@@ -10,11 +10,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await sequelize.authenticate();
 
+    // -----------------------
+    // GET — Fetch all reviews
+    // -----------------------
     if (method === 'GET') {
       const reviews = await Review.findAll({
         include: [
-          { model: User, attributes: ['id', 'name', 'photo'] },
-          { model: Listing, attributes: ['id', 'name'] }
+          { model: User, as: 'user', attributes: ['id', 'name', 'photo_url'] },
+          { model: Listing, as: 'listing', attributes: ['id', 'name', 'location', 'price'] }
         ],
         order: [['id', 'ASC']]
       });
@@ -22,37 +25,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(reviews);
     }
 
-if (method === 'POST') {
-  const { user_id, listing_id, rating, comment } = req.body;
+    // -----------------------
+    // POST — Create a new review
+    // -----------------------
+    if (method === 'POST') {
+      const { user_id, listing_id, rating, comment } = req.body;
 
-  // 1️⃣ Simple validation
-  if (!user_id || !listing_id) {
-    return res.status(400).json({ message: "user_id and listing_id are required" });
-  }
+      if (!user_id || !listing_id || !rating) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
 
-  if (rating < 1 || rating > 5) {
-    return res.status(400).json({ message: "Rating must be between 1 and 5" });
-  }
+      const newReview = await Review.create({
+        user_id,
+        listing_id,
+        rating,
+        comment
+      });
 
-  // 2️⃣ If valid → create
-  const newReview = await Review.create({
-    user_id,
-    listing_id,
-    rating,
-    comment
-  });
-
-  return res.status(201).json(newReview);
-}
-
+      return res.status(201).json(newReview);
+    }
 
     return res.status(405).json({ message: 'Method not allowed' });
+
   } catch (err: unknown) {
     if (err instanceof Error) {
-      return res.status(500).json({
-        message: 'Error fetching or creating reviews',
-        error: err.message
-      });
+      return res.status(500).json({ message: 'Error processing review', error: err.message });
     }
     return res.status(500).json({ message: 'Unknown error' });
   }

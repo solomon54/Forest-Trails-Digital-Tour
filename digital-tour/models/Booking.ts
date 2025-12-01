@@ -38,19 +38,28 @@ Booking.init(
     user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     listing_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     start_date: { type: DataTypes.DATE, allowNull: false },
-    end_date: { type: DataTypes.DATE, allowNull: false },
+    end_date: { type: DataTypes.DATE, allowNull: false }, 
     status: { type: DataTypes.ENUM('pending', 'confirmed', 'cancelled'), defaultValue: 'pending' },
     payment_method: { type: DataTypes.ENUM('online','manual'), allowNull: false },
     transaction_id: { type: DataTypes.STRING, allowNull: true },
   },
-  { sequelize, tableName: 'bookings', timestamps: true }
+  {
+    sequelize,
+    tableName: 'bookings',
+    timestamps: true,
+    underscored: true,         // maps snake_case in DB
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+  }
 );
 
 // Relationships
 Booking.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Booking, { foreignKey: 'user_id' });
 
-Booking.belongsTo(Listing, { foreignKey: 'listing_id' });
-Listing.hasMany(Booking, { foreignKey: 'listing_id' });
+// Booking.ts
+Booking.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
+Listing.hasMany(Booking, { foreignKey: 'listing_id', as: 'bookings' });
+
 
 export default Booking;

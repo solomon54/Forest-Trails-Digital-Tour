@@ -9,11 +9,11 @@ interface ListingAttributes {
   location?: string;
   price?: number;
   created_by: number;
-  createdAt?: Date;
+  createdAt?: Date;  // Keep camel—Sequelize maps to created_at
   updatedAt?: Date;
 }
 
-type ListingCreationAttributes = Optional<ListingAttributes, 'id' | 'createdAt' | 'updatedAt'>
+type ListingCreationAttributes = Optional<ListingAttributes, 'id' | 'createdAt' | 'updatedAt'>;
 
 class Listing extends Model<ListingAttributes, ListingCreationAttributes> implements ListingAttributes {
   public id!: number;
@@ -23,7 +23,7 @@ class Listing extends Model<ListingAttributes, ListingCreationAttributes> implem
   public price?: number;
   public created_by!: number;
 
-  public readonly createdAt!: Date;
+  public readonly createdAt!: Date;  // Camel for Sequelize
   public readonly updatedAt!: Date;
 }
 
@@ -36,10 +36,15 @@ Listing.init(
     price: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
     created_by: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
   },
-  { sequelize, tableName: 'listings', timestamps: true }
+  { 
+    sequelize, 
+    tableName: 'listings', 
+    timestamps: true,
+    underscored: true  // Debug fix: Maps camel JS → snake DB (createdAt → created_at)
+  }
 );
 
-// Relationships
+// Relationships (snake FKs already good)
 Listing.belongsTo(User, { foreignKey: 'created_by' });
 User.hasMany(Listing, { foreignKey: 'created_by' });
 

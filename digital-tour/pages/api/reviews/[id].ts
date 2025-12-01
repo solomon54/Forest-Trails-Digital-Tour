@@ -9,20 +9,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const method = req.method;
 
   try {
-    await sequelize.authenticate();
+if (method === 'GET') {
+  const review = await Review.findByPk(id as string, {
+    include: [
+      { model: User, as: 'user', attributes: ['id', 'name', 'photo_url'] },
+      { model: Listing, as: 'listing', attributes: ['id', 'name'] }
+    ]
+  });
 
-    if (method === 'GET') {
-      const review = await Review.findByPk(id as string, {
-        include: [
-          { model: User, attributes: ['id', 'name', 'photo'] },
-          { model: Listing, attributes: ['id', 'name'] }
-        ]
-      });
+  if (!review) return res.status(404).json({ message: 'Review not found' });
 
-      if (!review) return res.status(404).json({ message: 'Review not found' });
-
-      return res.status(200).json(review);
-    }
+  return res.status(200).json(review);
+}
 
     if (method === 'PUT') {
       const { rating, comment, user_photo } = req.body;

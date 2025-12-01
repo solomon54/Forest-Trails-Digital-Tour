@@ -14,14 +14,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (method === 'GET') {
       const listing = await Listing.findByPk(id as string, {
         include: [
-          { model: Resource },
-          { model: User, attributes: ['id', 'name', 'photo_url'] }
+          { 
+            model: Resource, 
+            as: 'resources',  // ← Key: Matches hasMany alias for JOIN
+            attributes: ['id', 'type', 'url', 'caption', 'status', 'createdAt'],  // Camel maps to snake via underscored
+            required: false  // LEFT JOIN: Handles no-resources gracefully
+          },
+          { 
+            model: User, 
+            attributes: ['id', 'name', 'photo_url'] 
+          }
         ]
       });
 
       if (!listing) return res.status(404).json({ message: 'Listing not found' });
 
-      return res.status(200).json(listing);
+      return res.status(200).json(listing);  // Now nests resources (e.g., Bahir Dar vids for mod queues)
     }
 
     if (method === 'PUT') {
@@ -44,10 +52,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     return res.status(405).json({ message: 'Method not allowed' });
+
   } catch (err: unknown) {
-  if (err instanceof Error) {
-    return res.status(500).json({ message: 'Error processing request', error: err.message });
+    if (err instanceof Error) {
+      return res.status(500).json({ message: 'Error processing request', error: err.message });
+    }
+    return res.status(500).json({ message: 'Unknown error' });
   }
-  return res.status(500).json({ message: 'Unknown error' });
-}
 }

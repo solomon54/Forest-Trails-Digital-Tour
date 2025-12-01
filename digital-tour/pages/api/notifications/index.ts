@@ -21,9 +21,15 @@ if (unread === 'true') where.readed = false;
 
 const notifications = await Notification.findAll({
   where,
-  order: [['createdAt', 'DESC']],
-  include: [{ model: User, attributes: ['id', 'name', 'photo_url'] }],
+  order: [['created_at', 'DESC']],
+  include: [
+    { 
+      model: User, as: 'user',
+      attributes: ['id', 'name', 'photo_url'] 
+    }
+  ],
 });
+
 
       return res.status(200).json(notifications);
     }

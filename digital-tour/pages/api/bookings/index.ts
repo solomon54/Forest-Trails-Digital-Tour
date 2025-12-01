@@ -10,18 +10,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     await sequelize.authenticate();
+if (method === 'GET') {
+  const bookings = await Booking.findAll({
+    include: [
+      { model: User, as: 'user', attributes: ['id', 'name'] },
+      { model: Listing, as: 'listing', attributes: ['id', 'name'] }
+    ],
+    order: [['id', 'ASC']]
+  });
 
-    if (method === 'GET') {
-      const bookings = await Booking.findAll({
-        include: [
-          { model: User, attributes: ['id', 'name'] },
-          { model: Listing, attributes: ['id', 'name'] }
-        ],
-        order: [['id', 'ASC']]
-      });
+  return res.status(200).json(bookings);
+}
 
-      return res.status(200).json(bookings);
-    }
 
     if (method === 'POST') {
       const { user_id, listing_id, start_date, end_date, status, payment_method } = req.body;

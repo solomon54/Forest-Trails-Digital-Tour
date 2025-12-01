@@ -13,6 +13,7 @@ interface NotificationAttributes {
   updated_at?: Date;
 }
 
+
 type NotificationCreationAttributes = Optional<NotificationAttributes, 'id' | 'readed' | 'created_at' | 'updated_at'>
 
 class Notification extends Model<NotificationAttributes, NotificationCreationAttributes> implements NotificationAttributes {
@@ -36,11 +37,25 @@ Notification.init(
     message: { type: DataTypes.TEXT, allowNull: false },
     readed: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
-  { sequelize, tableName: 'notifications', timestamps: true }
+  {
+    sequelize,
+    tableName: 'notifications',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+  }
 );
 
 // Relationships
-Notification.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Notification, { foreignKey: 'user_id' });
+Notification.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user"
+});
+
+User.hasMany(Notification, {
+  foreignKey: "user_id",
+  as: "notifications"
+});
+
 
 export default Notification;

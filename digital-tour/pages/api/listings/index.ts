@@ -10,40 +10,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await sequelize.authenticate();
 
-    // --------------------------------------------
-    // GET — Fetch all listings
-    // --------------------------------------------
     if (method === 'GET') {
       const listings = await Listing.findAll({
         include: [
-          { model: Resource },
-          { model: User, attributes: ['id', 'name', 'photo_url'] }
+          { 
+            model: Resource, 
+            as: 'resources',  // ← Key: Matches hasMany alias
+            attributes: ['id', 'type', 'url', 'caption', 'status', 'createdAt'],  // Camel works with underscored: true
+            required: false  // LEFT JOIN: Fault-tolerant if no resources
+          },
+          { 
+            model: User, 
+            attributes: ['id', 'name', 'photo_url'] 
+          }
         ],
-        order: [['id', 'ASC']]
+        order: [['createdAt', 'ASC']]  // Camel order maps to created_at
       });
 
-      return res.status(200).json(listings);
+      return res.status(200).json(listings);  // Now nests resources array (e.g., Addis with images/vids)
     }
 
-    // --------------------------------------------
-    // POST — Create a new listing (with validation)
-    // --------------------------------------------
+    // Your POST block unchanged...
     if (method === 'POST') {
       const { name, description, location, price, created_by } = req.body;
 
-      // 1️⃣ Required fields
       if (!name || !location || !created_by) {
         return res.status(400).json({
           message: 'name, location, and created_by are required.'
         });
       }
 
-      // 2️⃣ Validate price
       if (price == null || Number.isNaN(Number(price))) {
         return res.status(400).json({ message: 'price must be a valid number.' });
       }
 
-      // 3️⃣ Create the listing
       const newListing = await Listing.create({
         name,
         description: description ?? null,

@@ -10,11 +10,11 @@ interface ReviewAttributes {
   rating: number;
   comment?: string;
   user_photo?: string;
-  created_At?: Date;
-  updated_At?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-type ReviewCreationAttributes = Optional<ReviewAttributes, 'id' | 'comment' | 'user_photo' | 'created_At' | 'updated_At'>
+type ReviewCreationAttributes = Optional<ReviewAttributes, 'id' | 'comment' | 'user_photo' | 'created_at' | 'updated_at'>;
 
 class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implements ReviewAttributes {
   public id!: number;
@@ -24,8 +24,8 @@ class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implement
   public comment?: string;
   public user_photo?: string;
 
-  public readonly created_At!: Date;
-  public readonly updated_At!: Date;
+  public readonly created_at!: Date;
+  public readonly updated_at!: Date;
 }
 
 Review.init(
@@ -33,18 +33,25 @@ Review.init(
     id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
     user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     listing_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    rating: { type: DataTypes.INTEGER, allowNull: false },
+    rating: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     comment: { type: DataTypes.TEXT, allowNull: true },
-    user_photo: { type: DataTypes.TEXT, allowNull: true },
+    user_photo: { type: DataTypes.STRING, allowNull: true },
   },
-  { sequelize, tableName: 'reviews', timestamps: true }
+  {
+    sequelize,
+    tableName: 'reviews',
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+  }
 );
 
-// Relationships
-Review.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Review, { foreignKey: 'user_id' });
+// Associations with alias
+Review.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews' });
 
-Review.belongsTo(Listing, { foreignKey: 'listing_id' });
-Listing.hasMany(Review, { foreignKey: 'listing_id' });
+Review.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
+Listing.hasMany(Review, { foreignKey: 'listing_id', as: 'reviews' });
 
 export default Review;
