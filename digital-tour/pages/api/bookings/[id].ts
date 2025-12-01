@@ -14,10 +14,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (method === 'GET') {
       const booking = await Booking.findByPk(id as string, {
   include: [
-    { model: User, attributes: ['id', 'name', 'email'] },
+    { model: User, as: 'user', attributes: ['id', 'name', 'email'] },   // added 'as'
     { model: Listing, as: 'listing', attributes: ['id', 'name', 'location', 'price'] }
   ]
 });
+
 
 
       if (!booking) return res.status(404).json({ message: 'Booking not found' });

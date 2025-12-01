@@ -53,13 +53,15 @@ Booking.init(
   }
 );
 
-// Relationships
-Booking.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Booking, { foreignKey: 'user_id' });
+
+// Relationships with alias
+Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+User.hasMany(Booking, { foreignKey: 'user_id', as: 'bookings' });
 
 // Booking.ts
 Booking.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
 Listing.hasMany(Booking, { foreignKey: 'listing_id', as: 'bookings' });
 
 
+ 
 export default Booking;
