@@ -27,7 +27,7 @@ const LandingPage: NextPage = () => {
         subtitle="Premium travel experiences tailored for adventurers."
         backgroundImage="/images/hero.jpg"
         ctaPrimary={{ label: "Explore Tours", href: "/tours" }}
-        ctaSecondary={{ label: "Book Now", href: "/signup" }}
+        ctaSecondary={{ label: "Book Now", href: "/Signup" }}
       />
 
       {/* Featured Tours */}

@@ -16,34 +16,34 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-linear-to-l from-indigo-300 to-violet-600 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/">
-              <span className="text-emerald-600 font-bold text-2xl cursor-pointer">
+              <span className="text-emerald-100 font-bold text-2xl cursor-pointer">
                 TravelX
               </span>
             </Link>
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex space-x-6 items-center">
+          <div className="hidden md:flex space-x-3 items-center transition duration-300">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
-                <span className="text-slate-700 hover:text-emerald-600 font-medium cursor-pointer">
+                <span className="text-gray-100 hover:bg-emerald-600 font-medium cursor-pointer  rounded-md px-2 py-1.5 ">
                   {link.label}
                 </span>
               </Link>
             ))}
             <Link href="/login">
-              <button className="px-5 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 transition">
+              <button className="px-5 py-2 bg-emerald-600 text-gray-200 rounded-xl hover:bg-emerald-500 transition">
                 Login
               </button>
             </Link>
-            <Link href="/signup">
-              <button className="px-5 py-2 border border-emerald-600 text-emerald-600 rounded-xl hover:bg-emerald-50 transition">
+            <Link href="/Signup">
+              <button className="px-5 py-2 border border-emerald-600 text-gray-200 rounded-xl hover:bg-emerald-500 transition">
                 Signup
               </button>
             </Link>
