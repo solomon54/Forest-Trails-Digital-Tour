@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import {sequelize} from '../lib/db';
+import Media from './Media';
 
 interface UserAttributes {
   id: number;
@@ -38,5 +39,9 @@ User.init(
   },
   { sequelize, tableName: 'users', timestamps: true }
 );
+
+User.hasMany(Media, { foreignKey: "uploaded_by" });
+Media.belongsTo(User, { foreignKey: "uploaded_by" });
+
 
 export default User;

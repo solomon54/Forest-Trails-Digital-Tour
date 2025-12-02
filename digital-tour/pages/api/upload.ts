@@ -1,46 +1,52 @@
-import cloudinary from "@/lib/cloudinary";
-import formidable from "formidable";
+// pages/api/upload.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import formidable, { File, Fields, Files } from "formidable";
 import fs from "fs";
+import cloudinary from "@/lib/cloudinary";
+import Resource from "@/models/Resource";
 
-// Disable Next.js default body parsing
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export const config = { api: { bodyParser: false } };
 
-import { NextApiRequest, NextApiResponse } from "next";
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") return res.status(405).end();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method not allowed" });
+  const form = formidable({ multiples: false });
+
+  form.parse(req, async (err: any, fields: Fields, files: Files) => {
+    if (err) return res.status(500).json({ error: "Form parse error" });
+
+    const file: File | undefined = Array.isArray(files.file)
+      ? files.file[0]
+      : files.file;
+    const listingId = Number(fields.listing_id);
+    const caption = fields.caption?.toString() || "";
+
+    if (!file || !listingId) {
+      return res.status(400).json({ error: "File or listing_id missing" });
     }
 
-    const form = formidable({ multiples: false });
-
-    form.parse(req, async (err, fields, files) => {
-      if (err) return res.status(500).json({ error: "Upload failed" });
-
-      const file = Array.isArray(files.file) ? files.file[0] : files.file;
-
-      const uploadResult = await cloudinary.uploader.upload((file as formidable.File).filepath, {
-        folder: "your_project",
-        resource_type: "auto", // supports images + videos
+    try {
+      const upload = await cloudinary.uploader.upload(file.filepath, {
+        folder: "solomon_project",
+        resource_type: "auto",
       });
 
-      // Delete temp file
-      if (file) {
-        fs.unlinkSync(file.filepath);
-      }
+      fs.unlinkSync(file.filepath);
 
-      return res.status(200).json({
-        success: true,
-        url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
+      const resource = await Resource.create({
+        listing_id: listingId,
+        type: upload.resource_type === "video" ? "video" : "image",
+        url: upload.secure_url,
+        caption,
       });
-    });
-  } catch (error) {
-    return res.status(500).json({ error: "Server error", detail: error });
-  }
+
+      return res.status(200).json({ success: true, resource });
+    } catch (err) {
+      console.error("❌ Upload error:", err);
+      return res.status(500).json({ error: "Upload failed", details: err });
+    }
+  });
 }

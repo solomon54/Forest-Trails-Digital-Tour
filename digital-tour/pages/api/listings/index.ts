@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import Listing from '../../../models/Listing';
 import Resource from '../../../models/Resource';
 import User from '../../../models/User';
-import {sequelize} from '../../../lib/db';
+import { sequelize } from '../../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method;

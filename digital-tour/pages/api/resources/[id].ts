@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Resource from '../../../models/Resource';
 import Listing from '../../../models/Listing';
-import sequelize from '../../../lib/db';
+import {sequelize} from '../../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
