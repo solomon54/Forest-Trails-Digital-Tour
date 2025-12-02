@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import Booking from '../../../models/Booking';
 import User from '../../../models/User';
 import Listing from '../../../models/Listing';
-import sequelize from '../../../lib/db';
+import {sequelize} from '../../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;

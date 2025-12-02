@@ -57,7 +57,7 @@ const SignupForm: React.FC = () => {
       }
 
       alert("Account created successfully! Redirecting to login…");
-      window.location.href = "/login";
+      window.location.href = "/Login";
     } catch (err) {
       setError("Network error—please try again.");
     } finally {
@@ -173,7 +173,7 @@ const SignupForm: React.FC = () => {
       />
 
       <div className="text-center">
-        <Link href="/login" className="text-sm text-emerald-600 hover:text-emerald-500">
+        <Link href="/Login" className="text-sm text-emerald-600 hover:text-emerald-500">
           Already have an account? Log in
         </Link>
       </div>

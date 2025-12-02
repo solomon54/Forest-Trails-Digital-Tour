@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../lib/db';
+import {sequelize} from '../lib/db';
 import Listing from './Listing';
 
 interface ResourceAttributes {

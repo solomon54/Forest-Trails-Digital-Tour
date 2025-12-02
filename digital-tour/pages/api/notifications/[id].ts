@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Notification from '../../../models/Notification';
-import sequelize from '../../../lib/db';
+import {sequelize} from '../../../lib/db';
 import { User } from '@/models';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

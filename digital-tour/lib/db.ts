@@ -4,7 +4,7 @@ import { Sequelize, DataTypes } from "sequelize";
 export const sequelize = new Sequelize(
   process.env.DB_NAME!,
   process.env.DB_USER!,
-  process.env.DB_PASS!,
+  process.env.DB_PASS || "<!sol@12>"!,
   {
     host: process.env.DB_HOST!,
     dialect: "mysql",

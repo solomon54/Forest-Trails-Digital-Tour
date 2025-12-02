@@ -3,7 +3,7 @@ import Booking from '../../../models/Booking';
 import User from '../../../models/User';
 import Listing from '../../../models/Listing';
 import Notification from '../../../models/Notification'; // ✅ make sure this is here
-import sequelize from '../../../lib/db'; 
+import {sequelize} from '../../../lib/db'; 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method;

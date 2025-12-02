@@ -37,7 +37,7 @@ const Navbar = () => {
                 </span>
               </Link>
             ))}
-            <Link href="/login">
+            <Link href="/Login">
               <button className="px-5 py-2 bg-emerald-600 text-gray-200 rounded-xl hover:bg-emerald-500 transition">
                 Login
               </button>
