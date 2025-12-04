@@ -1,89 +1,82 @@
-// pages/tours/[id].tsx
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import PropertyDetail from "@/components/property/PropertyDetail";
 import BookingSection from "@/components/property/BookingSection";
-import ReviewSection from "@/components/property/ReviewSection";
+// import ReviewSection from "@/components/property/ReviewSection";
 import CardSkeleton from "@/components/skelotons/CardSkeleton";
-import { useEffect, useState } from "react";
 
-interface Tour {
+// FIX: Import the function directly, matching its named export in listingService.ts
+import { getListingById } from "@/services/listingService"; 
+
+// --- START: Interface Update (Restored for completeness) ---
+interface ListingDetail {
   id: number;
   name: string;
   location: string;
   price: number;
   image: string;
-  description?: string;
+  description: string;
+  media: { id: number; url: string; type: string }[]; 
+  reviews: { id: number; rating: number; comment: string; user: { name: string } }[];
 }
+// --- END: Interface Update ---
 
 export default function TourPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [tour, setTour] = useState<Tour | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [listing, setListing] = useState<ListingDetail | null>(null);
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false); 
+      return;
+    }
 
-    // Simulate API call for demo
-    setLoading(true);
-    setTimeout(() => {
-      setTour({
-        id: Number(id),
-        name: "Simien Mountains Trek",
-        location: "Gondar",
-        price: 180,
-        image: "/images/tour3.jpg",
-        description:
-          "Experience the breathtaking Simien Mountains in a 3-day adventure tour.",
-      });
-      setLoading(false);
-    }, 800);
+    // Reset state before fetching new data
+    setListing(null); 
+    setError(null);
+    setLoading(true); 
+    
+    // FIX: Call the imported function directly
+    getListingById(id as string) 
+      .then((data) => {
+        setListing({
+          id: data.id,
+          name: data.name,
+          location: data.location,
+          price: data.price,
+          image: data.resources?.[0]?.url || '/images/default-trail.jpg', 
+          description: data.description,
+          media: data.resources || [], 
+          reviews: data.reviews || []
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load listing", err);
+        console.log("Error details:", err.response?.data || err.message); 
+        setError("Failed to load trail—retry sync.");
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <CardSkeleton />;
 
-  if (!tour) return <div className="text-center p-8">Tour not found</div>;
+  if (error || !listing) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-red-500">{error || "Trail not found"}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-neutral-50 text-slate-900 font-inter">
-      <PropertyDetail property={tour} />
-      <BookingSection tour={tour} />
-      <ReviewSection tourId={tour.id} />
+      <PropertyDetail property={listing} /> 
+      <BookingSection listing={listing} />
+      {/* <ReviewSection listingId={listing.id} reviews={listing.reviews} /> */}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useRouter } from "next/router";
-// import PropertyDetail from "@/components/property/PropertyDetail";
-// import BookingSection from "@/components/property/BookingSection";
-// import ReviewSection from "@/components/property/ReviewSection";
-
-// export default function TourPage() {
-//   const router = useRouter();
-//   const { id } = router.query;
-
-//   // TODO: fetch tour data by id
-//   const tour = /* fetch from API or placeholder */;
-
-//   if (!tour) return <div>Loading...</div>;
-
-//   return (
-//     <div className="p-4 md:p-16">
-//       <PropertyDetail property={tour} />
-//       <BookingSection tour={tour} />
-//       <ReviewSection tourId={tour.id} />
-//     </div>
-//   );
-// }

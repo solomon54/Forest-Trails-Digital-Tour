@@ -32,7 +32,7 @@ const BookingCard = ({
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-900">{tourName}</h3>
         <span className={`px-3 py-1 rounded-xl text-white text-sm sm:text-base ${statusColors[status]}`}>
-          {status.toUpperCase()}
+          {/* {status.toUpperCase()} */}
         </span>
       </div>
 

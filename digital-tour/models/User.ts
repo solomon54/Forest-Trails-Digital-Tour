@@ -40,8 +40,5 @@ User.init(
   { sequelize, tableName: 'users', timestamps: true }
 );
 
-User.hasMany(Media, { foreignKey: "uploaded_by" });
-Media.belongsTo(User, { foreignKey: "uploaded_by" });
-
 
 export default User;

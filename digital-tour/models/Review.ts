@@ -1,22 +1,29 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import {sequelize} from '../lib/db';
-import User from './User';
-import Listing from './Listing';
+import { sequelize } from '@/lib/db';
 
+// 1️⃣ Attributes interface
 interface ReviewAttributes {
   id: number;
-  user_id: number;
-  listing_id: number;
-  rating: number;
+  user_id: number;  // FK to User
+  listing_id: number;  // FK to Listing
+  rating: number;  // e.g., 1-5
   comment?: string;
-  user_photo?: string;
+  user_photo?: string;  // Optional, from prior PUT usage
   created_at?: Date;
   updated_at?: Date;
 }
 
-type ReviewCreationAttributes = Optional<ReviewAttributes, 'id' | 'comment' | 'user_photo' | 'created_at' | 'updated_at'>;
+// 2️⃣ Creation attributes (exclude auto-generated)
+type ReviewCreationAttributes = Optional<
+  ReviewAttributes,
+  'id' | 'created_at' | 'updated_at'
+>;
 
-class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implements ReviewAttributes {
+// 3️⃣ Model class
+class Review
+  extends Model<ReviewAttributes, ReviewCreationAttributes>
+  implements ReviewAttributes
+{
   public id!: number;
   public user_id!: number;
   public listing_id!: number;
@@ -28,30 +35,44 @@ class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implement
   public readonly updated_at!: Date;
 }
 
+// 4️⃣ Init
 Review.init(
   {
-    id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
-    user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    listing_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    rating: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    comment: { type: DataTypes.TEXT, allowNull: true },
-    user_photo: { type: DataTypes.STRING, allowNull: true },
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    user_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: { model: 'users', key: 'id' },  // Optional FK constraint
+    },
+    listing_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: { model: 'listings', key: 'id' },  // Optional FK constraint
+    },
+    rating: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: { min: 1, max: 5 },  // Enforce 1-5
+    },
+    comment: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    user_photo: {
+      type: DataTypes.STRING,  // e.g., URL
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    tableName: 'reviews',
+    tableName: 'reviews',  // FIXED: Explicitly 'reviews' (not 'resources')
     timestamps: true,
-    underscored: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    underscored: true,  // created_at, updated_at
   }
 );
-
-// Associations with alias
-Review.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews' });
-
-Review.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
-Listing.hasMany(Review, { foreignKey: 'listing_id', as: 'reviews' });
 
 export default Review;

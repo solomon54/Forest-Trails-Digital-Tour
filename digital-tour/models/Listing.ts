@@ -1,7 +1,8 @@
+//models/Listing.ts
 import { DataTypes, Model, Optional } from 'sequelize';
-import {sequelize} from '../lib/db';
-import User from './User';
+import { sequelize } from '@/lib/db';
 
+// 1️⃣ Attributes interface
 interface ListingAttributes {
   id: number;
   name: string;
@@ -9,13 +10,21 @@ interface ListingAttributes {
   location?: string;
   price?: number;
   created_by: number;
-  createdAt?: Date;  // Keep camel—Sequelize maps to created_at
-  updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-type ListingCreationAttributes = Optional<ListingAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+// 2️⃣ Creation attributes
+type ListingCreationAttributes = Optional<
+  ListingAttributes,
+  'id' | 'created_at' | 'updated_at'
+>;
 
-class Listing extends Model<ListingAttributes, ListingCreationAttributes> implements ListingAttributes {
+// 3️⃣ Model class
+class Listing
+  extends Model<ListingAttributes, ListingCreationAttributes>
+  implements ListingAttributes
+{
   public id!: number;
   public name!: string;
   public description?: string;
@@ -23,29 +32,30 @@ class Listing extends Model<ListingAttributes, ListingCreationAttributes> implem
   public price?: number;
   public created_by!: number;
 
-  public readonly createdAt!: Date;  // Camel for Sequelize
-  public readonly updatedAt!: Date;
+  public readonly created_at!: Date;
+  public readonly updated_at!: Date;
 }
 
+// 4️⃣ Init
 Listing.init(
   {
-    id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: true },
     location: { type: DataTypes.STRING, allowNull: true },
     price: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
     created_by: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
   },
-  { 
-    sequelize, 
-    tableName: 'listings', 
+  {
+    sequelize,
+    tableName: 'listings',
     timestamps: true,
-    underscored: true  // Debug fix: Maps camel JS → snake DB (createdAt → created_at)
+    underscored: true, // maps created_at, updated_at
   }
 );
-
-// Relationships (snake FKs already good)
-Listing.belongsTo(User, { foreignKey: 'created_by' });
-User.hasMany(Listing, { foreignKey: 'created_by' });
 
 export default Listing;

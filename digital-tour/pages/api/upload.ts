@@ -15,7 +15,7 @@ export default async function handler(
 
   const form = formidable({ multiples: false });
 
-  form.parse(req, async (err: any, fields: Fields, files: Files) => {
+  form.parse(req, async (err: unknown, fields: Fields, files: Files) => {
     if (err) return res.status(500).json({ error: "Form parse error" });
 
     const file: File | undefined = Array.isArray(files.file)
@@ -23,6 +23,10 @@ export default async function handler(
       : files.file;
     const listingId = Number(fields.listing_id);
     const caption = fields.caption?.toString() || "";
+const descriptionField = fields.description as string | string[] | undefined;
+const description =
+  Array.isArray(descriptionField) ? descriptionField[0] : descriptionField?.toString() || "";
+
 
     if (!file || !listingId) {
       return res.status(400).json({ error: "File or listing_id missing" });
@@ -41,6 +45,7 @@ export default async function handler(
         type: upload.resource_type === "video" ? "video" : "image",
         url: upload.secure_url,
         caption,
+        description,
       });
 
       return res.status(200).json({ success: true, resource });

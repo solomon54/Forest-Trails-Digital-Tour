@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Resource from '../../../models/Resource';
-import Listing from '../../../models/Listing';
+import { Resource, Listing } from '@/models';
 import {sequelize} from '../../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -12,7 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (method === 'GET') {
       const resource = await Resource.findByPk(id as string, {
-        include: [{ model: Listing, attributes: ['id', 'name'] }],
+        include: [{ model: Listing, 
+          as: 'resourceListing', attributes: ['id', 'name'] }],
       });
       if (!resource) return res.status(404).json({ message: 'Resource not found' });
       return res.status(200).json(resource);

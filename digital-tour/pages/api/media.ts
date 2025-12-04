@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import Sequelize from 'sequelize';
 import { User } from '@/models';
+import { sequelize } from '@/lib/db';
 
 interface MediaAttributes {
   id: number;

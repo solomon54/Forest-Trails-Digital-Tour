@@ -1,23 +1,26 @@
+// models/index.ts
+import { sequelize } from '@/lib/db';
+
 import User from './User';
 import Listing from './Listing';
 import Resource from './Resource';
 import Review from './Review';
 import Booking from './Booking';
 import Notification from './Notification';
+import Media from './Media';
+
 import { applyAssociations } from './Association';
 
-// Apply all associations once
-// applyAssociations();
+// Run associations AFTER all models are imported
+applyAssociations();
 
-// export { User, Listing, Resource, Review, Booking, Notification };
-
-// ... existing imports ...
-import Media from './Media';
-import sequelize from 'sequelize/lib/sequelize';
-
-// In applyAssociations():
-User.hasMany(Media, { foreignKey: 'uploaded_by', as: 'media' });
-Media.belongsTo(User, { foreignKey: 'uploaded_by', as: 'user' });
-
-// Export
-export { sequelize, User, Listing, Resource, Booking, Review, Notification, Media };
+export {
+  sequelize,
+  User,
+  Listing,
+  Resource,
+  Review,
+  Booking,
+  Notification,
+  Media
+};

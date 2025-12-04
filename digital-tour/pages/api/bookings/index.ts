@@ -1,8 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Booking from '../../../models/Booking';
-import User from '../../../models/User';
-import Listing from '../../../models/Listing';
-import Notification from '../../../models/Notification'; // ✅ make sure this is here
+import {Booking, Notification, User, Listing } from "@/models";
 import {sequelize} from '../../../lib/db'; 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
+import React from "react";
 import { useEffect, useState } from "react";
 
 interface ListingDetail {
@@ -9,8 +10,8 @@ interface ListingDetail {
   location: string;
   price: number;
   resources: { id: number; type: 'image' | 'video'; url: string; caption?: string }[];
-  reviews: { user: { name: string }; rating: number; comment: string }[];
-  bookings: { status: string }[]; // Summary count
+  reviews: { id: number; rating: number; comment: string; user: { name: string } }[];
+  bookings: { id: number; status: string }[];
   user: { name: string };
 }
 
@@ -30,27 +31,32 @@ export default function ListingDetail() {
     }
   }, [id]);
 
-  if (loading) return <div className="p-8 flex justify-center"><p>Loading detail...</p></div>;
+  if (loading) return <div className="p-8 flex justify-center"><p>Loading trail...</p></div>;
   if (!listing) return <p className="p-8 text-center">Trail not found.</p>;
+
+  const confirmedBookings = listing.bookings.filter(b => b.status === 'confirmed').length;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button onClick={() => router.back()} className="mb-4 text-emerald-600 hover:underline">← Back to Trails</button>
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div>
+        <button onClick={() => router.back()} className="mb-4 text-emerald-600 hover:underline text-sm">← Back to Trails</button>
+        <div className="grid lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{listing.name}</h1>
-            <p className="text-gray-600 mb-6">{listing.description}</p>
-            <p className="text-emerald-600 font-medium text-xl">ETB {listing.price}/night • {listing.location}</p>
-            <p className="text-sm text-gray-500 mt-2">Hosted by {listing.user.name}</p>
+            <p className="text-gray-600 mb-6 leading-relaxed">{listing.description}</p>
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-emerald-600 font-medium text-xl">ETB {listing.price}/night</p>
+              <p className="text-sm text-gray-500">{listing.location}</p>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">Hosted by {listing.user.name}</p>
           </div>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500">Bookings: {listing.bookings.length} active ({listing.bookings.filter(b => b.status === 'confirmed').length} confirmed)</p>
-            <p className="text-sm text-gray-500">Reviews: {listing.reviews.length}</p>
+          <div className="space-y-4 text-sm">
+            <p>Bookings: {listing.bookings.length} total ({confirmedBookings} confirmed)</p>
+            <p>Reviews: {listing.reviews.length}</p>
           </div>
         </div>
 
-        {/* Resources Gallery */}
+        {/* Gallery */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Sights & Media</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -68,13 +74,16 @@ export default function ListingDetail() {
         </section>
 
         {/* Reviews */}
-        <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews ({listing.reviews.length})</h2>
           <div className="space-y-4">
-            {listing.reviews.map((review, i) => (
-              <div key={i} className="bg-white p-4 rounded-lg shadow">
-                <p className="text-gray-900 font-medium">{review.user.name} ({review.rating}/5)</p>
-                <p className="text-gray-600 mt-2">{review.comment}</p>
+            {listing.reviews.map((review) => (
+              <div key={review.id} className="bg-white p-4 rounded-lg shadow">
+                <div className="flex items-center mb-2">
+                  <span className="text-yellow-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                  <span className="ml-2 text-sm text-gray-500">by {review.user.name}</span>
+                </div>
+                <p className="text-gray-600">{review.comment}</p>
               </div>
             ))}
           </div>

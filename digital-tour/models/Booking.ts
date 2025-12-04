@@ -1,7 +1,8 @@
+//models/Booking.ts
 import { DataTypes, Model, Optional } from 'sequelize';
 import {sequelize} from '../lib/db';
-import User from './User';
-import Listing from './Listing';
+// import { User, Listing } from "@/models";
+
 
 interface BookingAttributes {
   id: number;
@@ -52,16 +53,5 @@ Booking.init(
     updatedAt: 'updated_at'
   }
 );
-
-
-// Relationships with alias
-Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-User.hasMany(Booking, { foreignKey: 'user_id', as: 'bookings' });
-
-// Booking.ts
-Booking.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
-Listing.hasMany(Booking, { foreignKey: 'listing_id', as: 'bookings' });
-
-
  
 export default Booking;

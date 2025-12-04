@@ -10,9 +10,9 @@ import CardSkeleton from "@/components/skelotons/CardSkeleton";
 
 // Sample data placeholders
 const featuredTours = [
-  { id: 1, name: "Ethiopia Adventure", location: "Addis Ababa", price: 120, image: "/images/tour1.jpg" },
-  { id: 2, name: "Bahir Dar Lakeside", location: "Bahir Dar", price: 150, image: "/images/tour2.jpg" },
-  { id: 3, name: "Simien Mountains Trek", location: "Gondar", price: 180, image: "/images/tour3.jpg" },
+  { id: 1, name: "Ethiopia Adventure", location: "Addis Ababa", price: 120, image: "/images/login-bg.jpg" },
+  { id: 2, name: "Bahir Dar Lakeside", location: "Bahir Dar", price: 150, image: "/images/images.jpeg" },
+  { id: 3, name: "Simien Mountains Trek", location: "Gondar", price: 180, image: "/images/hero.jpg" },
 ];
 
 const LandingPage: NextPage = () => {

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Notification from '../../../models/Notification';
+import { Notification, User } from '../../../models';
+
 import {sequelize} from '../../../lib/db';
-import { User } from '@/models';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (id) {
         const notification = await Notification.findByPk(id as string, {
           include: [
-            { model: User, as: 'user', attributes: ['id', 'name', 'photo_url'] }
+            { model: User, as: 'notificationUser', attributes: ['id', 'name', 'photo_url'] }
           ]
         });
 

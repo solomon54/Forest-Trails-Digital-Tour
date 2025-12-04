@@ -1,6 +1,6 @@
+//api/notifications/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Notification from '../../../models/Notification';
-import User from '../../../models/User';
+import { Notification, User } from '@/models';
 import {sequelize} from '../../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -24,7 +24,7 @@ const notifications = await Notification.findAll({
   order: [['created_at', 'DESC']],
   include: [
     { 
-      model: User, as: 'user',
+      model: User, as: 'notificationUser',
       attributes: ['id', 'name', 'photo_url'] 
     }
   ],

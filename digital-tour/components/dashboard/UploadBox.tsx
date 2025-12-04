@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 export default function UploadPage() {
+const [description, setDescription] = useState("");
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [caption, setCaption] = useState("");
@@ -23,6 +24,8 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("caption", caption);
+    formData.append("description", description);
+
     formData.append("listing_id", "1"); // Static for now
     formData.append("userId", "5"); // Replace with real user ID
 
@@ -104,6 +107,14 @@ export default function UploadPage() {
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
           />
+          {/* Description Area */}
+        <textarea
+        placeholder="Add a detailed description…"
+        className="w-full px-4 py-2 mb-4 rounded-lg border h-32 resize-none"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        ></textarea>
+
 
           {/* File picker */}
           <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 cursor-pointer hover:bg-gray-200 bg-white">

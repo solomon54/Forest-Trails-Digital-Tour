@@ -1,50 +1,44 @@
-import User from './User';
-import Listing from './Listing';
-import Resource from './Resource';
-import Review from './Review';
-import Booking from './Booking';
-import Notification from './Notification';
+// models/Association.ts
+import User from "./User";
+import Listing from "./Listing";
+import Resource from "./Resource";
+import Review from "./Review";
+import Booking from "./Booking";
+import Notification from "./Notification";
+import Media from "./Media";
 
 export function applyAssociations() {
-  // -----------------------------
-  // Listings & Resources
-  // -----------------------------
-  Listing.hasMany(Resource, { foreignKey: 'listing_id', as: 'resources' });
-  Resource.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
 
-  // -----------------------------
-  // Listings & Reviews
-  // -----------------------------
+  // Listings ↔ Resources
+  Listing.hasMany(Resource, { foreignKey: "listing_id", as: "resources" });
+  Resource.belongsTo(Listing, { foreignKey: "listing_id", as: "resourceListing" });
+
+  // Listings ↔ Reviews
   Listing.hasMany(Review, { foreignKey: 'listing_id', as: 'reviews' });
-  Review.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
+  Review.belongsTo(Listing, { foreignKey: 'listing_id', as: 'reviewListing' });
 
-  // -----------------------------
-  // Listings & Bookings
-  // -----------------------------
+  // Users ↔ Reviews
+  Review.belongsTo(User, { foreignKey: 'user_id', as: 'reviewUser' });
+  User.hasMany(Review, { foreignKey: 'user_id', as: 'userReviews' });
+
+  // Listings ↔ Bookings
   Listing.hasMany(Booking, { foreignKey: 'listing_id', as: 'bookings' });
   Booking.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
 
-  // -----------------------------
-  // Users & Listings
-  // -----------------------------
-  Listing.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
-  User.hasMany(Listing, { foreignKey: 'created_by', as: 'listings' });
-
-  // -----------------------------
-  // Users & Reviews
-  // -----------------------------
-  Review.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-  User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews' });
-
-  // -----------------------------
-  // Users & Bookings
-  // -----------------------------
-  Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+  // Users ↔ Bookings
   User.hasMany(Booking, { foreignKey: 'user_id', as: 'bookings' });
+  Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
-  // -----------------------------
-  // Users & Notifications
-  // -----------------------------
-  Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-  User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
+  // Users ↔ Notification
+  User.hasMany(Notification, { foreignKey: "user_id", as: "notifications" });
+  Notification.belongsTo(User, { foreignKey: "user_id", as: "notificationUser" });
+
+  // Users ↔ Media
+  User.hasMany(Media, { foreignKey: "uploaded_by", as: "media" });
+  Media.belongsTo(User, { foreignKey: "uploaded_by", as: "mediaUser" });
+
+ // Users ↔ Listings
+  Listing.belongsTo(User, { foreignKey: "created_by", as: "creator" });
+User.hasMany(Listing, { foreignKey: "created_by", as: "userListings" });
+
 }

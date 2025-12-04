@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import {sequelize} from '../lib/db';
-import User from './User';
+
 
 interface NotificationAttributes {
   id: number;
@@ -45,17 +45,6 @@ Notification.init(
     updatedAt: 'updated_at'
   }
 );
-
-// Relationships
-Notification.belongsTo(User, {
-  foreignKey: "user_id",
-  as: "user"
-});
-
-User.hasMany(Notification, {
-  foreignKey: "user_id",
-  as: "notifications"
-});
 
 
 export default Notification;

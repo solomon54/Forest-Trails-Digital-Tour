@@ -1,7 +1,6 @@
+//api/reviews/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Review from '../../../models/Review';
-import User from '../../../models/User';
-import Listing from '../../../models/Listing';
+import { Review, User, Listing } from '@/models';
 import {sequelize} from '../../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,8 +15,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (method === 'GET') {
       const reviews = await Review.findAll({
         include: [
-          { model: User, as: 'user', attributes: ['id', 'name', 'photo_url'] },
-          { model: Listing, as: 'listing', attributes: ['id', 'name', 'location', 'price'] }
+          { model: User, as: 'reviewUser', attributes: ['id', 'name', 'photo_url'] },
+          { model: Listing, as: 'reviewListing', attributes: ['id', 'name', 'location', 'price'] }
         ],
         order: [['id', 'ASC']]
       });
