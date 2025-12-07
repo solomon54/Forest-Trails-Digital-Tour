@@ -1,3 +1,4 @@
+//models/User.ts
 import { DataTypes, Model, Optional } from 'sequelize';
 import {sequelize} from '../lib/db';
 import Media from './Media';
@@ -37,7 +38,15 @@ User.init(
     role: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
     photo_url: { type: DataTypes.TEXT, allowNull: true },
   },
-  { sequelize, tableName: 'users', timestamps: true }
+  {
+    sequelize,
+    tableName: 'users',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+  }
+
+  // { sequelize, tableName: 'users', timestamps: true }
 );
 
 

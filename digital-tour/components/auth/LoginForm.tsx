@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const LoginForm: React.FC = () => {
+  const router = useRouter();
+  const redirectTo = (router.query.redirect as string) || "/";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +27,7 @@ const LoginForm: React.FC = () => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
@@ -33,9 +38,9 @@ const LoginForm: React.FC = () => {
         return;
       }
 
-      // Save token or session here if using JWT
-      alert("Login successful!");
-      window.location.href = "/"; // redirect to home
+      // Login success
+      router.replace(redirectTo); // 👈 THIS fixes everything
+
     } catch (err) {
       setError("Network error—please try again.");
     } finally {
@@ -44,13 +49,14 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-white/95 rounded-3xl shadow-2xl p-8">
-      <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
+    <div className="bg-white/90 rounded-3xl shadow-2xl p-8">
+      <h2 className="text-2xl font-bold text-center text-gray-900 mb-4 rounded-ss-full bg-gray-300/70 p-4">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="text-red-600 text-sm">{error}</div>}
         <div>
           <label className="block text-sm text-gray-700">Email</label>
           <input
+            style={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", color: "#333", outline: "none" }}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -59,10 +65,12 @@ const LoginForm: React.FC = () => {
             required
           />
         </div>
+
         <div>
           <label className="block text-sm text-gray-700">Password</label>
           <div className="relative">
             <input
+              style={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", color: "#333", outline: "none" }}
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -70,14 +78,30 @@ const LoginForm: React.FC = () => {
               placeholder="Password"
               required
             />
-            <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center" onClick={() => setShowPassword(!showPassword)}>
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-700"
+              onClick={() => setShowPassword(!showPassword)}
+            >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
         </div>
-        <Button type="submit" buttonLabel={loading ? "Logging in..." : "Login"} buttonBackgroundColor="emerald" disabled={loading} className="w-full" />
+
+        <Button
+          type="submit"
+          buttonLabel={loading ? "Logging in..." : "Login"}
+          buttonBackgroundColor="emerald"
+          disabled={loading}
+          className="w-full"
+        />
+
         <p className="text-sm text-center mt-2">
-          Dont have an account? <Link href="/Signup" className="text-emerald-600">Did not have account? Sign up</Link>
+          <Link href="/Signup" className="text-emerald-600">
+            {" "}
+          Don`t have an account?
+            Sign up
+          </Link>
         </p>
       </form>
     </div>

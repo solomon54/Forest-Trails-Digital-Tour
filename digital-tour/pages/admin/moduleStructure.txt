@@ -1,0 +1,15 @@
+hooks/useAuth.ts
+
+services/adminService.ts
+
+components/admin/ResourcesCard.tsx
+
+components/admin/ResourceModal.tsx
+
+pages/admin/index.tsx
+
+pages/admin/resources/[id].tsx
+
+pages/admin/AdminLayout.tsx
+
+types/admin.ts (or types/listings.ts + types/resource.ts)

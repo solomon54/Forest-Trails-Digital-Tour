@@ -41,4 +41,10 @@ export function applyAssociations() {
   Listing.belongsTo(User, { foreignKey: "created_by", as: "creator" });
 User.hasMany(Listing, { foreignKey: "created_by", as: "userListings" });
 
+
+// Users ↔ Resources (locking)
+Resource.belongsTo(User, { foreignKey: "locked_by", as: "locker" });
+User.hasMany(Resource, { foreignKey: "locked_by", as: "lockedResources" });
+
 }
+
