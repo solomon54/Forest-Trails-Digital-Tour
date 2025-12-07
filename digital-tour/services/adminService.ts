@@ -1,4 +1,40 @@
 // services/adminService.ts
+import apiClient from "./apiClient";
+import { Resource } from "@/types/admin";
+
+export const adminService = {
+  async getPendingResources(): Promise<Resource[]> {
+    const res = await apiClient.get<Resource[]>("/admin/resources?status=pending");
+    return res.data;
+  },
+
+  async approveResource(id: number, updates?: { caption?: string; description?: string }) {
+    // PATCH to update status and optional fields
+    const res = await apiClient.put<Resource>(`/admin/resources/${id}`, {
+      status: "approved",
+      ...updates,
+    });
+    return res.data;
+  },
+
+  async rejectResource(id: number, reason?: string) {
+    const res = await apiClient.put<Resource>(`/admin/resources/${id}`, {
+      status: "rejected",
+      reason: reason ?? null,
+    });
+    return res.data;
+  },
+
+  async getResource(id: number) {
+    const res = await apiClient.get<Resource>(`/admin/resources/${id}`);
+    return res.data;
+  }
+};
+
+
+
+
+/*// services/adminService.ts
 import apiClient from './apiClient';
 import { Resource, Listing } from '@/types/admin';
 
@@ -42,3 +78,5 @@ export const adminService = {
     return res.data;
   }
 };
+*/
+

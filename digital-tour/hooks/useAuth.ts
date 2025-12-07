@@ -1,45 +1,41 @@
 // hooks/useAuth.ts
 import { useEffect, useState } from "react";
 
-export const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+  photo_url?: string | null;
+}
+
+export function useAuth() {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchUser = async () => {
+    let mounted = true;
+    async function fetchMe() {
       try {
         const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) {
-            setUser(data.user);
-            setIsAdmin(data.user?.role === "admin");
-          }
+        if (!mounted) return;
+        if (!res.ok) {
+          setUser(null);
         } else {
-          if (isMounted) {
-            setUser(null);
-            setIsAdmin(false);
-          }
+          const json = await res.json();
+          setUser(json.user ?? null);
         }
       } catch (err) {
-        if (isMounted) {
-          setUser(null);
-          setIsAdmin(false);
-        }
+        setUser(null);
       } finally {
-        if (isMounted) setLoading(false); // ← THIS fixes the loop
+        if (mounted) setLoading(false);
       }
-    };
-
-    fetchUser();
-
-    return () => {
-      isMounted = false;
-    };
+    }
+    fetchMe();
+    return () => { mounted = false; };
   }, []);
 
   return { user, loading, isAdmin };
-};
+}

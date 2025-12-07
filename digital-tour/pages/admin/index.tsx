@@ -1,36 +1,37 @@
 // pages/admin/index.tsx
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
+import { useAuth } from "@/hooks/useAuth";
+import MainLayout from "@/components/layout/MainLayout";
 
-import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+// Lazy load dashboard
+const Dashboard = dynamic(() => import("@/components/admin/Dashboard"), {
+  suspense: true,
+});
 
-export default function AdminDashboard() {
-  const { user, loading, isAdmin } = useAuth();
-  const router = useRouter();
-
-useEffect(() => {
-  if (!loading) {
-    if (!user) {
-      router.replace(`/Login?redirect=${router.asPath}`);
-      return;
-    }
-    if (!isAdmin) {
-      router.replace('/');
-      return;
-    }
-  }
-}, [loading, user, isAdmin, router]);
-
-  if (loading) return <p>Loading...</p>;
-
-  if (!user) return null;  // while redirecting, render nothing
-
-  if (!isAdmin) return <p>Access denied.</p>;
-
+// Skeleton UI (loading state)
+function DashboardSkeleton() {
   return (
-    <div>
-      <h1>Welcome Admin {user.name} ✨</h1>
+    <div className="animate-pulse space-y-4">
+      <div className="h-6 w-40 bg-gray-300 rounded"></div>
+      <div className="h-4 w-full bg-gray-300 rounded"></div>
+      <div className="h-4 w-3/4 bg-gray-300 rounded"></div>
     </div>
   );
 }
 
+export default function AdminPage() {
+  const { loading, user, isAdmin } = useAuth();
+
+  if (loading) return <DashboardSkeleton />;
+  if (!user) return null;
+  if (!isAdmin) return <p>Access Denied</p>;
+
+  return (
+    <MainLayout>
+      <Suspense fallback={<DashboardSkeleton />}>
+        <Dashboard />
+      </Suspense>
+    </MainLayout>
+  );
+}
