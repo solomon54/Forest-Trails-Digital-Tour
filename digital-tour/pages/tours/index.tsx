@@ -38,14 +38,16 @@ export default function ToursListingPage() {
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {tours.map((tour) => {
         // FIXED: Safe price parsing (string -> number -> format)
-        const priceNum = tour.price ? parseFloat(tour.price) : 0;
-        const formattedPrice = priceNum > 0 ? `$${priceNum.toFixed(2)}` : 'Price TBD';
+              const priceNum = Number(tour.price) || 0;
+      const formattedPrice = priceNum > 0 ? `$${priceNum.toFixed(2)}` : "Price TBD";
 
-        // FIXED: First approved image (prioritize images over videos)
-        const coverImage = tour.resources?.find((res) => res.type === 'image' && res.status === 'approved')?.url ||
-                           tour.resources?.[0]?.url ||  // Fallback to first resource if no image
-                           tour.creator?.photo_url ||
-                           "/images/placeholder.jpg";
+      const coverImage =
+        tour.resources?.find((r) => r.type === "image" && r.status === "approved")?.url ||
+        tour.resources?.[0]?.url ||
+        "/images/placeholder.jpg";
+
+
+       
 
         return (
           <Link href={`/tours/${tour.id}`} key={tour.id}>

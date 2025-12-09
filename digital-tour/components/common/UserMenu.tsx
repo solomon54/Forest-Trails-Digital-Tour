@@ -29,7 +29,7 @@ export default function UserMenu() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 bg-gray-200 w-9 h-9 rounded-full rounded-xl shadow hover:bg-gray-100"
+        className="flex items-center text-center justify-center gap-2 bg-gray-200 w-10 h-10 rounded-full shadow hover:bg-gray-100"
       >
 
         {/* Avatar or initials */}

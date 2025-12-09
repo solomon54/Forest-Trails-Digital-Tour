@@ -8,6 +8,7 @@ export interface User {
 }
 
 export interface Resource {
+  resourceListing: any;
   id: number;
   listing_id: number;
   type: 'image' | 'video';

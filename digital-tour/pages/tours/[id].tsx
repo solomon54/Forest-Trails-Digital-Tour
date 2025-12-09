@@ -1,3 +1,4 @@
+//pages/tours/[id].tsx
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PropertyDetail from "@/components/property/PropertyDetail";

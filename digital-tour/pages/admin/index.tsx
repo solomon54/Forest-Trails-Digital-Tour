@@ -2,7 +2,7 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
-import MainLayout from "@/components/layout/MainLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 
 // Lazy load dashboard
 const Dashboard = dynamic(() => import("@/components/admin/Dashboard"), {
@@ -28,10 +28,10 @@ export default function AdminPage() {
   if (!isAdmin) return <p>Access Denied</p>;
 
   return (
-    <MainLayout>
+    <AdminLayout>
       <Suspense fallback={<DashboardSkeleton />}>
         <Dashboard />
       </Suspense>
-    </MainLayout>
+    </AdminLayout>
   );
 }
