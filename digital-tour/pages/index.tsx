@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import Navbar from "@/components/navbar/Navbar";
 import HeroSection from "@/components/hero/HeroSection";
 import PropertyCard from "@/components/property/PropertyCard";
-import BookingCard from "@/components/property/BookingSection";
+import BookingCard from "@/components/property/BookingForm";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/buttons/Button";
 import CardSkeleton from "@/components/skelotons/CardSkeleton";

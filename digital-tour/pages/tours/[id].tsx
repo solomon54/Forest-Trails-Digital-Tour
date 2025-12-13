@@ -2,12 +2,15 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PropertyDetail from "@/components/property/PropertyDetail";
-import BookingSection from "@/components/property/BookingSection";
+import BookingSection from "@/components/property/BookingForm";
 // import ReviewSection from "@/components/property/ReviewSection";
 import CardSkeleton from "@/components/skelotons/CardSkeleton";
 
 // FIX: Import the function directly, matching its named export in listingService.ts
 import { getListingById } from "@/services/listingService"; 
+import Footer from "@/components/layout/Footer";
+import UserMenu from "@/components/common/UserMenu";
+import BookingForm from "@/components/cards/BookingForm";
 
 // --- START: Interface Update (Restored for completeness) ---
 interface ListingDetail {
@@ -75,9 +78,12 @@ export default function TourPage() {
 
   return (
     <div className="bg-neutral-50 text-slate-900 font-inter">
+      <UserMenu />
       <PropertyDetail property={listing} /> 
       <BookingSection listing={listing} />
       {/* <ReviewSection listingId={listing.id} reviews={listing.reviews} /> */}
+      <BookingForm />
+    <Footer />
     </div>
   );
 }

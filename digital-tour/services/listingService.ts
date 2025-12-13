@@ -1,12 +1,22 @@
-//service/listingService.ts
+// services/listingService.ts
+
 import apiClient from "./apiClient";
 import { Listing } from "@/types/admin";
 
-export const getAllListings = async (): Promise<Listing[]> => {
-  const res = await apiClient.get("/listings");
+interface GetAllListingsParams {
+  status?: string;
+  // Add other optional parameters here
+}
+
+// Fixed function signature and implementation
+export const getAllListings = async (params: GetAllListingsParams): Promise<Listing[]> => {
+  // apiClient should handle serializing the params object into a query string
+  // e.g., apiClient.get("/listings", { params: { status: 'active' } })
+  const res = await apiClient.get("/listings", { params }); 
   return res.data;
 };
 
+// ... (other functions remain the same)
 export const getListingById = async (id: number): Promise<Listing> => {
   const res = await apiClient.get(`/listings/${id}`);
   return res.data;

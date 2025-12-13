@@ -5,16 +5,11 @@ import { Resource } from "@/models";
 import { ResourceAttributes } from "@/models/Resource";
 import { sequelize } from "@/lib/db";
 
-// Type for JWT payload
 interface AuthPayload {
   id: number;
-  email: string;
   role: "admin" | "user";
-  iat: number;
-  exp: number;
 }
 
-// Typed query params
 interface ResourceQuery {
   status?: ResourceAttributes["status"];
 }
@@ -24,7 +19,6 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    // Authentication
     const token = getTokenFromRequest(req);
     if (!token) return res.status(401).json({ message: "Not authenticated" });
 
@@ -34,27 +28,50 @@ export default async function handler(
 
     await sequelize.authenticate();
 
-    // GET /admin/resources
-    if (req.method === "GET") {
-      const query = req.query as ResourceQuery;
-      const where: Partial<ResourceAttributes> = {};
+    if (req.method !== "GET") return res.status(405).end();
 
-      if (query.status) {
-        where.status = query.status;
-      }
+    const { status } = req.query as ResourceQuery;
+    const where: Partial<ResourceAttributes> = status ? { status } : {};
 
-      const resources = await Resource.findAll({
-        where,
-        order: [["created_at", "ASC"]],
-      });
+    // First: fetch with current locks
+    let resources = await Resource.findAll({
+      where,
+      order: [["created_at", "ASC"]],
+    });
 
-      return res.status(200).json(resources);
+    // Auto-unlock expired ones
+    const now = new Date();
+    const expired = resources.filter(
+      (r) => r.locked_by && r.lock_expires_at && now > r.lock_expires_at
+    );
+
+    if (expired.length > 0) {
+      const expiredIds = expired.map((r) => r.id);
+
+      await Resource.update(
+        {
+          locked_by: null,
+          locked_at: null,
+          lock_expires_at: null,
+        
+        },
+        { where: { id: expiredIds } }
+      );
+
+      console.log(`Auto-unlocked ${expired.length} expired resources`);
+
+      // Refetch only the unlocked ones + return clean list
+      const [unlocked, stillLocked] = await Promise.all([
+        Resource.findAll({ where: { id: expiredIds } }),
+        Resource.findAll({ where: { id: { [require("sequelize").Op.notIn]: expiredIds }, ...where } }),
+      ]);
+
+      resources = [...stillLocked, ...unlocked];
     }
 
-    return res.status(405).end();
+    return res.status(200).json(resources);
   } catch (err) {
-    console.error("admin resources index error", err);
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return res.status(500).json({ message: "Server error", error: message });
+    console.error("admin resources list error", err);
+    return res.status(500).json({ message: "Server error" });
   }
 }

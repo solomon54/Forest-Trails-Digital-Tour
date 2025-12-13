@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/"  className="font-bold text-emerald-600">ForestTrail</Link>
           <nav className="flex gap-4">
             <Link href="/admin"  className="text-sm">Dashboard</Link>
-            <Link href="/admin/listings"  className="text-sm">Listings</Link>
+            <Link href="/admin/Listings"  className="text-sm">Listings</Link>
             <Link href="/admin/resources"  className="text-sm">Resources</Link>
           </nav>
         </div>

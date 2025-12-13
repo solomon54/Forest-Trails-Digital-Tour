@@ -13,9 +13,11 @@ interface Updates {
 interface Props {
   resource: Resource | null;
   onClose: () => void;
-  onApprove: (id: number, updates?: Updates) => Promise<void>;
-  onReject: (id: number, reason?: string) => Promise<void>;
-  busy?: boolean;  // Add for parent loading state
+  // MODIFIED: Handlers now require adminId
+  onApprove: (id: number, updates: Updates | undefined, adminId: number) => Promise<void>; 
+  onReject: (id: number, reason: string | undefined, adminId: number) => Promise<void>; 
+  busy?: boolean;  
+  currentUserId: number; // NEW PROP ADDED
 }
 
 export default function ResourceModal({ 
@@ -23,7 +25,8 @@ export default function ResourceModal({
   onClose, 
   onApprove, 
   onReject, 
-  busy = false  // Default false
+  busy = false,
+  currentUserId // NEW PROP DESTRUCTURED
 }: Props) {
   const [caption, setCaption] = useState("");
   const [description, setDescription] = useState("");
@@ -34,7 +37,7 @@ export default function ResourceModal({
 
   if (!resource) return null;
 
-  // Sync fields (no ESLint disable needed)
+  // Sync fields
   useEffect(() => {
     setCaption(resource.caption ?? "");
     setDescription(resource.description ?? "");
@@ -45,62 +48,50 @@ export default function ResourceModal({
   }, [resource]);
 
   const validateReject = (): boolean => {
-    if (!reason.trim()) {
-      setReasonError("Rejection reason is required (min 10 characters for meaningful feedback).");
-      return false;
-    }
-    if (reason.trim().length < 10) {
+    // ... validation logic ...
+    if (!reason.trim() || reason.trim().length < 10) {
       setReasonError("Rejection reason must be at least 10 characters long.");
       return false;
     }
     setReasonError("");
     return true;
   };
+const doApprove = async () => {
+  if (busy || !location.trim() || price <= 0) {
+    alert('Location and price required for approval.');
+    return;
+  }
+  const updates = { name: caption, description, location, price: Number(price) };
+  await onApprove(resource.id, updates, currentUserId);
+};
 
-  const doApprove = async () => {
-    if (busy) return;
+const doReject = async () => {
+  if (!validateReject() || busy) return;
 
-    const updates: Updates = {};  // Typed
-    if (caption !== resource.caption) updates.caption = caption;
-    if (description !== resource.description) updates.description = description;
-    if (location !== resource.resourceListing?.location) updates.location = location;
-    const priceNum = price === "" ? undefined : Number(price);
-    if (priceNum !== resource.resourceListing?.price) updates.price = priceNum;
+  try {
+    await onReject(resource.id, reason, currentUserId);
+    // don't call onClose here
+  } catch (err) {
+    console.error("Reject failed:", err);
+  }
+};
 
-    console.log('Sending updates:', updates);
-
-    try {
-      await onApprove(resource.id, Object.keys(updates).length > 0 ? updates : undefined);
-      onClose();
-    } catch (err) {
-      console.error("Approve failed:", err);
-    }
-  };
-
-  const doReject = async () => {
-    if (!validateReject() || busy) return;
-
-    try {
-      await onReject(resource.id, reason);
-      onClose();
-    } catch (err) {
-      console.error("Reject failed:", err);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl max-w-4xl w-full overflow-auto max-h-[90vh] p-6">
+      <div className="bg-gray-100   red rounded-2xl max-w-4xl w-full overflow-auto max-h-[90vh] p-6">
+        {/* ... Rest of the UI (omitted for brevity) ... */}
         <div className="flex justify-between items-start mb-4">
-          <h2 className="text-2xl font-semibold">Review & Edit Resource #{resource.id}</h2>
+          <h2 className="text-2xl text-green-700 font-semibold">Review & Edit Resource #{resource.id}</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700 text-xl font-bold disabled:opacity-50"
+            className="text-gray-500 hover:text-red-600 text-xl font-bold disabled:opacity-50 "
             disabled={busy}
           >
             ×
           </button>
         </div>
+     
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Media Preview */}
@@ -121,7 +112,7 @@ export default function ResourceModal({
               <input 
                 value={caption} 
                 onChange={(e) => setCaption(e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" 
                 disabled={busy}
               />
             </div>
@@ -131,7 +122,7 @@ export default function ResourceModal({
               <textarea 
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 h-24 resize-none" 
+                className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 h-24 resize-none" 
                 disabled={busy}
                 placeholder="Update description for approval sync..."
               />
@@ -145,7 +136,7 @@ export default function ResourceModal({
                   type="text"
                   value={location} 
                   onChange={(e) => setLocation(e.target.value)} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" 
                   placeholder="e.g., Addis Ababa, Ethiopia"
                   disabled={busy}
                 />
@@ -157,7 +148,7 @@ export default function ResourceModal({
                   step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" 
                   placeholder="e.g., 150.00"
                   disabled={busy}
                 />
@@ -185,7 +176,7 @@ export default function ResourceModal({
         </div>
 
         {/* Rejection Section */}
-        <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
+        <div className="mt-6 p-4 bg-red-50 text-gray-700 border border-red-200 rounded-md">
           <label className="block text-sm font-medium text-red-800 mb-2">Rejection Reason (Required for Feedback)</label>
           <textarea 
             value={reason} 

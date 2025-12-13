@@ -8,6 +8,7 @@ export interface User {
 }
 
 export interface Resource {
+  locked_by: number;
   resourceListing: any;
   id: number;
   listing_id: number;
@@ -24,6 +25,8 @@ export interface Resource {
 }
 
 export interface Listing {
+  url: Text;
+  creator: string;
   id: number;
   name: string;
   description?: string | null;

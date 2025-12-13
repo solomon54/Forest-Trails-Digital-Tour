@@ -2,75 +2,116 @@
 import apiClient from "./apiClient";
 import { Resource } from "@/types/admin";
 
+// =============================
+// 1. Main Admin Service (Recommended way)
+// =============================
 export const adminService = {
+  // Fetch all pending resources
   async getPendingResources(): Promise<Resource[]> {
     const res = await apiClient.get<Resource[]>("/admin/resources?status=pending");
     return res.data;
   },
 
-  async approveResource(id: number, updates?: { caption?: string; description?: string; location?: string; price?: number; }, adminId?: number) {
-    // PUT to update status and optional fields (legacy; consider migrating to POST)
+  // Get single resource (any status)
+  async getResource(id: number): Promise<Resource> {
+    const res = await apiClient.get<Resource>(`/admin/resources/${id}`);
+    return res.data;
+  },
+
+  // Approve with optional edits
+  async approveResource(
+    id: number,
+    updates?: {
+      caption?: string;
+      description?: string;
+      location?: string;
+      price?: number;
+    },
+    adminId?: number
+  ): Promise<Resource> {
     const res = await apiClient.put<Resource>(`/admin/resources/${id}`, {
       status: "approved",
-      adminId,  // Pass to API for logging
+      adminId,
       ...updates,
     });
     return res.data;
   },
 
-  async rejectResource(id: number, reason?: string, adminId?: number) {
+  // Reject with mandatory reason (min 10 chars)
+  async rejectResource(id: number, reason: string, adminId?: number): Promise<Resource> {
     if (!reason || reason.trim().length < 10) {
-      throw new Error("Rejection reason must be at least 10 characters");
+      throw new Error("Rejection reason must be at least 10 characters long");
     }
+
     const res = await apiClient.put<Resource>(`/admin/resources/${id}`, {
       status: "rejected",
-      rejection_reason: reason,  // Use correct field name for API
-      adminId,  // Pass to API for logging
+      rejection_reason: reason,
+      adminId,
     });
     return res.data;
   },
-
-  async getResource(id: number) {
-    const res = await apiClient.get<Resource>(`/admin/resources/${id}`);
-    return res.data;
-  }
 };
 
-
-// NEW: Listing admin API
-export async function getAllAdminListings(filter?: string) {
-  const res = await apiClient.get(`/admin/listings`, {
-    params: { filter }
-  });
+// =============================
+// 2. Resource Locking (consistent + safe)
+// =============================
+export const lockResource = async (id: number, adminId: number) => {
+  const res = await apiClient.post(
+    `/admin/resources/${id}?action=lock`,
+    {},
+    { headers: { "x-admin-id": String(adminId) } }
+  );
   return res.data;
-}
+};
 
-export async function lockListing(id: number) {
-  const res = await apiClient.post(`/admin/listings/${id}/lock`);
+export const unlockResource = async (id: number, adminId: number) => {
+  const res = await apiClient.post(
+    `/admin/resources/${id}?action=unlock`,
+    {},
+    { headers: { "x-admin-id": String(adminId) } }
+  );
   return res.data;
-}
+};
 
-export async function releaseLock(id: number) {
-  const res = await apiClient.post(`/admin/listings/${id}/unlock`);
-  return res.data;
-}
+// =============================
+// 3. Admin Listings CRUD + Locking (now consistent!)
+// =============================
+export const adminListingService = {
+  async getAll(filter?: string) {
+    const res = await apiClient.get("/admin/listings", { params: { filter } });
+    return res.data;
+  },
 
-export async function updateListing(id: number, updates: any) {
-  const res = await apiClient.put(`/admin/listings/${id}`, updates);
-  return res.data;
-}
+  async lock(id: number, adminId: number) {
+    const res = await apiClient.post(
+      `/admin/listings/${id}/lock`,
+      {},
+      { headers: { "x-admin-id": String(adminId) } }
+    );
+    return res.data;
+  },
 
-export async function deleteListing(id: number) {
-  const res = await apiClient.delete(`/admin/listings/${id}`);
-  return res.data;
-}
+  async unlock(id: number, adminId: number) {
+    const res = await apiClient.post(
+      `/admin/listings/${id}/unlock`,
+      {},
+      { headers: { "x-admin-id": String(adminId) } }
+    );
+    return res.data;
+  },
 
-// NEW: Resource status update
-export async function updateResourceStatus(
-  id: number,
-  status: "approved" | "rejected"
-) {
-  const res = await apiClient.put(`/admin/resources/${id}`, { status });
-  return res.data;
-}
+  async update(id: number, updates: unknown) {
+    const res = await apiClient.put(`/admin/listings/${id}`, updates);
+    return res.data;
+  },
 
+  async delete(id: number) {
+    const res = await apiClient.delete(`/admin/listings/${id}`);
+    return res.data;
+  },
+};
+
+// =============================
+// 4. Bonus: Tiny helper if you really need it elsewhere
+// =============================
+export type ResourceStatus = "approved" | "rejected";

@@ -27,6 +27,7 @@ export default function UserMenu() {
 
   return (
     <div className="relative">
+         <div className="fixed right-1.5 top-1.5" >
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center text-center justify-center gap-2 bg-gray-200 w-10 h-10 rounded-full shadow hover:bg-gray-100"
@@ -45,7 +46,7 @@ export default function UserMenu() {
           </div>
         )}
       </button>
-
+    </div>
       {/* Dropdown */}
       {open && (
         <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md z-50">

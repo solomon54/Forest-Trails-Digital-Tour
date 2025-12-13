@@ -39,6 +39,8 @@ export class ResourceModel
   declare status: "pending" | "approved" | "rejected";
   declare readonly created_at: Date;
   declare readonly updated_at: Date;
+  lock_expires_at: number | null;
+  uploaded_by: number;
 }
 
 ResourceModel.init(

@@ -1,138 +1,230 @@
-// pages/api/admin/resources/[id].ts
+// pages/api/admin/resources/[id].ts (FINALIZED CODE)
+
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Resource, Listing } from '@/models';
+import { Resource, Listing, User } from '@/models';
 import { sequelize } from '@/lib/db';
+import { Op } from 'sequelize';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
-  if (!id || Array.isArray(id)) {
-    return res.status(400).json({ message: 'Valid resource ID is required' });
+  if (!id || Array.isArray(id)) return res.status(400).json({ message: 'Invalid ID' });
+
+  const resourceId = Number(id);
+  if (isNaN(resourceId)) return res.status(400).json({ message: 'Invalid ID' });
+
+  const headerAdminId = req.headers['x-admin-id'];
+  const adminIdFromHeader = headerAdminId ? Number(headerAdminId) : null;
+  if (headerAdminId && (isNaN(adminIdFromHeader!) || adminIdFromHeader! <= 0)) {
+    return res.status(400).json({ message: 'Valid x-admin-id header required' });
   }
 
   try {
     await sequelize.authenticate();
 
+    // Helper: auto-unlock expired
+    const autoUnlockIfExpired = async (resource: Resource) => {
+      if (resource.locked_by && resource.lock_expires_at && new Date() > new Date(resource.lock_expires_at)) {
+        await resource.update({
+          locked_by: null,
+          locked_at: null,
+          lock_expires_at: null,
+          lock_reason: null,
+        });
+        console.log(`Auto-unlocked expired Resource ${resource.id}`);
+        return await resource.reload();
+      }
+      return resource;
+    };
+
+    // GET: Fetch + auto-unlock expired
     if (req.method === 'GET') {
-      const resource = await Resource.findByPk(id, {
-        include: [{ model: Listing, as: 'resourceListing', attributes: ['id', 'name', 'description', 'location', 'price', 'status', 'url'] }],
+      let resource = await Resource.findByPk(resourceId, {
+        include: [
+          { model: Listing, as: 'resourceListing', attributes: ['id', 'name', 'description', 'location', 'price', 'status', 'url'] },
+          { model: User, as: 'locker', attributes: ['id', 'name'], required: false },
+        ],
       });
-      if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+      if (!resource) return res.status(404).json({ message: 'Not found' });
+      resource = await autoUnlockIfExpired(resource);
       return res.status(200).json(resource);
     }
 
+    // POST: lock/unlock
     if (req.method === 'POST') {
-      // Lock/Unlock actions
-      const { action } = req.query;  // ?action=lock or unlock
-      const headerAdminId = req.headers['x-admin-id'] as string;
-      if (!headerAdminId) {
-        return res.status(401).json({ message: 'Admin ID required (x-admin-id header)' });
+      if (!adminIdFromHeader) return res.status(401).json({ message: 'x-admin-id required' });
+      const { action } = req.query as { action?: 'lock' | 'unlock' };
+      if (!action || !['lock', 'unlock'].includes(action)) {
+        return res.status(400).json({ message: 'action=lock|unlock required' });
       }
-      const effectiveAdminId = Number(headerAdminId);  // Cast to number for locked_by
 
-      const resource = await Resource.findByPk(id);
-      if (!resource) return res.status(404).json({ message: 'Resource not found' });
+      const t = await sequelize.transaction();
+      try {
+        let resource = await Resource.findByPk(resourceId, {
+          transaction: t,
+          lock: t.LOCK.UPDATE,
+        });
 
-      if (action === 'lock') {
-        if (resource.locked_by) {
-          return res.status(400).json({ message: 'Resource already locked (by admin ' + resource.locked_by + ')' });
+        if (!resource) {
+          await t.rollback();
+          return res.status(404).json({ message: 'Not found' });
         }
-        await resource.update({ locked_by: effectiveAdminId, locked_at: new Date() });
-        return res.status(200).json({ message: `Resource locked by admin ${effectiveAdminId}` });
-      }
 
-      if (action === 'unlock') {
-        if (resource.locked_by !== effectiveAdminId) {
-          return res.status(403).json({ message: 'Can only unlock your own locks' });
+        resource = await autoUnlockIfExpired(resource);
+
+        if (action === 'lock') {
+          if (resource.locked_by) {
+            await t.rollback();
+            return res.status(409).json({ message: `Locked by admin ${resource.locked_by}` });
+          }
+
+          const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+          await resource.update({
+            locked_by: adminIdFromHeader,
+            locked_at: new Date(),
+            lock_expires_at: expiresAt,
+            lock_reason: req.body.lock_reason || null,
+          }, { transaction: t });
+
+          await t.commit();
+          return res.status(200).json({ message: 'Locked', expiresAt });
         }
-        await resource.update({ locked_by: null, locked_at: null });
-        return res.status(200).json({ message: `Resource unlocked by admin ${effectiveAdminId}` });
-      }
 
-      return res.status(405).json({ message: 'Action required (?action=lock|unlock)' });
+        if (action === 'unlock') {
+          if (resource.locked_by !== adminIdFromHeader) {
+            await t.rollback();
+            return res.status(403).json({ message: 'Can only unlock your own lock' });
+          }
+          await resource.update({
+            locked_by: null,
+            locked_at: null,
+            lock_expires_at: null,
+            lock_reason: null,
+          }, { transaction: t });
+          await t.commit();
+          return res.status(200).json({ message: 'Unlocked' });
+        }
+      } catch (err) {
+        await t.rollback();
+        console.error(`POST transaction failed for resource ${resourceId}:`, err); 
+        throw err;
+      }
     }
 
+    // PUT: Approve/Reject (with lock check + auto-unlock + Listing sync/create)
     if (req.method === 'PUT') {
       const { status, rejection_reason, adminId, ...updates } = req.body;
-      const headerAdminId = req.headers['x-admin-id'] as string;
-      const effectiveAdminId = Number(adminId || headerAdminId);  // Cast to number
+      const adminIdFromBody = adminId ? Number(adminId) : null;
+      const effectiveAdminId = adminIdFromBody || adminIdFromHeader;
 
-      if (!effectiveAdminId) {
-        console.log('Missing adminId - body:', adminId, 'header:', headerAdminId);
-        return res.status(401).json({ message: 'Admin ID required (body or x-admin-id header)' });
-      }
+      if (!effectiveAdminId) return res.status(401).json({ message: 'Admin ID required' });
 
-      console.log('Approve payload:', updates);  // Debug: See what Modal sends
-
-      if (!status && Object.keys(updates).length === 0) {
-        return res.status(400).json({ message: 'Update data required (e.g., status)' });
-      }
-
-      const resource = await Resource.findByPk(id);
-      if (!resource) return res.status(404).json({ message: 'Resource not found' });
-
-      if (status === 'approved') {
-        if (resource.status !== 'pending') {
-          return res.status(400).json({ message: 'Only pending resources can be approved' });
+      const t = await sequelize.transaction();
+      try {
+        let resource = await Resource.findByPk(resourceId, { transaction: t, lock: t.LOCK.UPDATE });
+        if (!resource) {
+          await t.rollback();
+          return res.status(404).json({ message: 'Not found' });
         }
 
-        // Always create NEW Listing (add another list)
-        const newListing = await Listing.create({
-          name: updates.caption || resource.caption || 'Untitled',  // Copy caption
-          description: updates.description || resource.description || null,
-          location: updates.location || null,
-          price: updates.price ? Number(updates.price) : 0,  // Default 0 if null (avoids error)
-          status: 'active',
-          url: resource.url,  // Copy url
-          created_by: effectiveAdminId,  // Number cast
-        });
+        resource = await autoUnlockIfExpired(resource);
 
-        // Link Resource to new Listing
-        await resource.update({ 
-          status: 'approved', 
-          listing_id: newListing.id,  // Set to new ID
-          ...updates 
-        });
-
-        const updatedResource = await Resource.findByPk(id, { 
-          include: [{ model: Listing, as: 'resourceListing' }] 
-        });
-        return res.status(200).json({ 
-          message: `Resource approved by admin ${effectiveAdminId}. New Listing #${newListing.id} created & synced.`, 
-          resource: updatedResource 
-        });
-      } else if (status === 'rejected') {
-        if (!rejection_reason || rejection_reason.trim().length < 10) {
-          return res.status(400).json({ message: 'Rejection reason required (min 10 chars for user feedback)' });
+        // Enforce lock
+        if (resource.locked_by && resource.locked_by !== effectiveAdminId) {
+          await t.rollback();
+          return res.status(403).json({ message: `Locked by admin ${resource.locked_by}` });
         }
-        await resource.update({ 
-          status: 'rejected', 
-          rejection_reason, 
-          ...updates 
+
+        // Prepare update data for Resource
+        const updateData: any = { ...updates };
+
+        if (status === 'approved' || status === 'rejected') {
+          updateData.status = status;
+          if (status === 'rejected') {
+            if (!rejection_reason || rejection_reason.trim().length < 10) {
+              await t.rollback();
+              return res.status(400).json({ message: 'Rejection reason required (min 10 chars)' });
+            }
+            updateData.rejection_reason = rejection_reason.trim();
+          }
+        }
+
+        
+      // APPROVE SYNC: Copy to listings (create if no listing_id OR if ID missing, update if exists)
+if (status === 'approved') {
+  console.log('SYNC TRIGGERED: status=approved, updates=', updates, 'resource.listing_id=', resource.listing_id);  // Debug: Confirm hit + data
+
+  let listingId: number | null = resource.listing_id;
+  const listingData = {
+    name: updates.name || updates.caption || resource.caption || 'Untitled Listing',
+    description: updates.description || resource.description || '',
+    location: updates.location || 'TBD',
+    price: updates.price ? Number(updates.price) : 0.00,
+    status: 'active',
+    url: resource.url,
+    cover_image_url: resource.url,
+    created_by: resource.uploaded_by || effectiveAdminId,
+    updated_by: effectiveAdminId
+  };
+  console.log('Listing data prepared:', listingData);  // Debug: Values
+
+  if (!listingId) {
+    // CREATE NEW (unattached)
+    const newListing = await Listing.create(listingData, { transaction: t });
+    listingId = newListing.id;
+    updateData.listing_id = listingId;
+    console.log(`CREATED active Listing ${listingId}`);  // Success
+  } else {
+    // VALIDATE & UPDATE EXISTING (or create if ghost)
+    const existingListing = await Listing.findByPk(listingId, { transaction: t });
+    if (!existingListing) {
+      console.log(`Ghost listing_id ${listingId} not found—creating new`);
+      const newListing = await Listing.create(listingData, { transaction: t });
+      listingId = newListing.id;
+      updateData.listing_id = listingId;  // Re-link
+      console.log(`CREATED active Listing ${listingId} (ghost fix)`);
+    } else {
+      // UPDATE
+      const [rowsUpdated] = await Listing.update(listingData, {
+        where: { id: listingId },
+        transaction: t,
+      });
+      console.log(`UPDATED ${rowsUpdated} row(s) in Listing ${listingId}`);  // 1 or 0 (warn if 0)
+    }
+  }
+}
+        // END APPROVE SYNC (reject skips—no copy)
+
+        // Always release lock on success
+        updateData.locked_by = null;
+        updateData.locked_at = null;
+        updateData.lock_expires_at = null;
+        updateData.lock_reason = null;
+
+        // Update Resource
+        await resource.update(updateData, { transaction: t });
+
+        await t.commit();
+
+        // Refetch for response (with includes)
+        const finalResource = await Resource.findByPk(resourceId, {
+          include: [
+            { model: Listing, as: 'resourceListing', attributes: ['id', 'name', 'description', 'location', 'price', 'status', 'url'] },
+            { model: User, as: 'locker', attributes: ['id', 'name'], required: false },
+          ],
         });
-        return res.status(200).json({ 
-          message: `Resource rejected by admin ${effectiveAdminId}. Reason: ${rejection_reason.substring(0, 50)}...`, 
-          resource 
-        });
-      } else {
-        // Generic update
-        await resource.update({ status, rejection_reason, ...updates });
-        const updatedResource = await Resource.findByPk(id, { 
-          include: [{ model: Listing, as: 'resourceListing' }] 
-        });
-        return res.status(200).json({ message: 'Resource updated', resource: updatedResource });
+
+        return res.status(200).json(finalResource);
+      } catch (err) {
+        await t.rollback();
+        console.error(`PUT transaction failed for resource ${resourceId}:`, err);
+        return res.status(500).json({ message: 'Failed to process resource and sync listing.' });
       }
     }
 
-    if (req.method === 'DELETE') {
-      const resource = await Resource.findByPk(id);
-      if (!resource) return res.status(404).json({ message: 'Resource not found' });
-      await resource.destroy();
-      return res.status(200).json({ message: 'Resource deleted' });
-    }
-
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).end();
   } catch (error) {
-    console.error('Error processing resource:', error);
-    return res.status(500).json({ message: 'Server error', error: (error as Error).message });
+    console.error('Resource API general error:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 }
