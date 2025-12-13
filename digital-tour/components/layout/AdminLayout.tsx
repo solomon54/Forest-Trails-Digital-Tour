@@ -1,6 +1,6 @@
 //layuout/MainLayout.tsx
 import Link from "next/link";
-import UserMenu from "@/components/common/UserMenu";
+import UserMenu from "@/components/users/UserProfile";
 import Navbar from "../navbar/Navbar";
 import Footer from "./Footer";
 import { useState } from "react";

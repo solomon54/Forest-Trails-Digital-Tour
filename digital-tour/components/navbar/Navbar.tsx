@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { HiMenu, HiX } from "react-icons/hi";
-import UserMenu from "../common/UserMenu";
+import UserMenu from "../users/UserProfile";
 import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
