@@ -13,11 +13,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { userId, unread } = req.query;
 
       // Filter notifications by user and optionally unread
-const where: { user_id?: number; readed?: boolean } = {};
+const where: { user_id?: number; is_read?: boolean } = {};
 
 // Convert query params to proper types
 if (userId) where.user_id = Number(userId);
-if (unread === 'true') where.readed = false;
+if (unread === 'true') where.is_read = false;
 
 const notifications = await Notification.findAll({
   where,
@@ -42,7 +42,7 @@ const notifications = await Notification.findAll({
         type,
         title,
         message,
-        readed: false,
+        is_read: false,
       });
 
       // Future: trigger email here

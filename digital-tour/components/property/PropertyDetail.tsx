@@ -37,7 +37,7 @@ export default function PropertyDetail({ property }: { property: ListingDetail }
     .filter((p) => p.trim());
 
   return (
-    <>
+    <main className="sm:p-0 md:p-2 ">
       <div className="max-w-6xl mx-auto py-10 px-4 lg:px-0">
         <h1 className="text-4xl font-bold text-gray-900 mb-6">{property.name}</h1>
 
@@ -180,6 +180,6 @@ export default function PropertyDetail({ property }: { property: ListingDetail }
           Check Availability
         </button>
       </div>
-    </>
+    </main>
   );
 }

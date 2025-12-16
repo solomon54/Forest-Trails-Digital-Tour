@@ -10,6 +10,8 @@ import Notification from './Notification';
 import Media from './Media';
 
 import { applyAssociations } from './Association';
+import BookingContact from './BookingContact';
+
 
 // Run associations AFTER all models are imported
 applyAssociations();
@@ -21,6 +23,8 @@ export {
   Resource,
   Review,
   Booking,
+  BookingContact,
   Notification,
   Media
 };
+

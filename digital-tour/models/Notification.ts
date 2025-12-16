@@ -8,13 +8,13 @@ interface NotificationAttributes {
   type: 'success' | 'info' | 'warning';
   title: string;
   message: string;
-  readed: boolean;
+  is_read: boolean;
   created_at?: Date;
   updated_at?: Date;
 }
 
 
-type NotificationCreationAttributes = Optional<NotificationAttributes, 'id' | 'readed' | 'created_at' | 'updated_at'>
+type NotificationCreationAttributes = Optional<NotificationAttributes, 'id' | 'is_read' | 'created_at' | 'updated_at'>
 
 class Notification extends Model<NotificationAttributes, NotificationCreationAttributes> implements NotificationAttributes {
   public id!: number;
@@ -22,7 +22,7 @@ class Notification extends Model<NotificationAttributes, NotificationCreationAtt
   public type!: 'success' | 'info' | 'warning';
   public title!: string;
   public message!: string;
-  public readed!: boolean;
+  public is_read!: boolean;
 
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
@@ -35,7 +35,7 @@ Notification.init(
     type: { type: DataTypes.ENUM('success','info','warning'), allowNull: false },
     title: { type: DataTypes.STRING, allowNull: false },
     message: { type: DataTypes.TEXT, allowNull: false },
-    readed: { type: DataTypes.BOOLEAN, defaultValue: false },
+    is_read: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
     sequelize,
