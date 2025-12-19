@@ -1,83 +1,69 @@
-//pages/api/bookings/index.ts
+// pages/api/bookings/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Booking, Notification, User, Listing } from '@/models';
+import { Booking, Listing, BookingContact } from '@/models';
 import { sequelize } from '@/lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const method = req.method;
-
   try {
-    /* ===================== GET ===================== */
-    if (method === 'GET') {
+    /* ===================== GET (ADMIN) ===================== */
+    if (req.method === 'GET') {
       const bookings = await Booking.findAll({
         include: [
-          { model: User, as: 'user', attributes: ['id', 'name'] },
-          { model: Listing, as: 'listing', attributes: ['id', 'name'] }
+          { model: Listing, as: 'listing', attributes: ['id', 'name', 'location'] },
+          { model: BookingContact, as: 'contact' }
         ],
-        order: [['id', 'ASC']]
+        order: [['created_at', 'DESC']]
       });
 
       return res.status(200).json(bookings);
     }
 
-    /* ===================== POST ===================== */
-   if (method === 'POST') {
-  const { user_id, listing_id, start_date, end_date, payment_method } = req.body;
-
-  if (!user_id || !listing_id || !start_date || !end_date || !payment_method) {
-    return res.status(400).json({ message: 'Missing required fields' });
-  }
-
-  const booking = await sequelize.transaction(async (t) => {
-    // Check for overlapping bookings
-    const existingBooking = await Booking.findOne({
-      where: {
-        listing_id,
-        start_date,
-        end_date
-      },
-      transaction: t
-    });
-
-    if (existingBooking) {
-      throw new Error('This listing is already booked for the selected dates.');
-    }
-
-    const newBooking = await Booking.create(
-      {
+    /* ===================== POST (USER) ===================== */
+    if (req.method === 'POST') {
+      const {
         user_id,
         listing_id,
         start_date,
         end_date,
-        status: 'pending',
-        payment_status: 'pending',
-        payment_method
-      },
-      { transaction: t }
-    );
+        payment_method,
+        contact
+      } = req.body;
 
-    await Notification.create(
-      {
-        user_id,
-        type: 'info',
-        title: 'Booking Created',
-        message: 'Your booking request has been sent and is awaiting approval.',
-        is_read: 0
-      },
-      { transaction: t }
-    );
+      if (!user_id || !listing_id || !start_date || !end_date || !payment_method || !contact) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
 
-    return newBooking;
-  });
+      const booking = await sequelize.transaction(async (t) => {
+        const createdBooking = await Booking.create(
+          {
+            user_id,
+            listing_id,
+            start_date,
+            end_date,
+            payment_method,
+            status: 'pending',
+            payment_status: 'pending'
+          },
+          { transaction: t }
+        );
 
-  return res.status(201).json(booking);
-}
+        await BookingContact.create(
+          {
+            booking_id: createdBooking.id,
+            ...contact
+          },
+          { transaction: t }
+        );
 
+        return createdBooking;
+      });
+
+      return res.status(201).json(booking);
+    }
 
     return res.status(405).json({ message: 'Method not allowed' });
-
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Error processing bookings' });
+    return res.status(500).json({ message: 'Server error' });
   }
 }

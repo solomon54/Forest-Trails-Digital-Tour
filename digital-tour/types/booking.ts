@@ -1,4 +1,5 @@
 export interface Booking {
+  contact: any;
   id: number;
   user_id: number;
   listing_id: number;

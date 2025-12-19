@@ -6,7 +6,7 @@ import PropertyDetail from "@/components/property/PropertyDetail";
 import CardSkeleton from "@/components/skelotons/CardSkeleton";
 import Footer from "@/components/layout/Footer";
 import UserMenu from "@/components/users/UserProfile";
-import BookingForm from "@/components/property/BookingForm";
+import BookingForm from "@/components/property/booking/BookingForm";
 import { getListingById } from "@/services/listingService";
 import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
@@ -103,9 +103,6 @@ export default function TourPage() {
 
       {/* --- Booking Form with Availability Check --- */}
       <div id="bookingForm" className="mt-6">
-        {availabilityMessage && (
-          <div className="mb-4 text-red-500 font-medium">{availabilityMessage}</div>
-        )}
         <BookingForm
           listingId={listing.id}
           userId={user.id}

@@ -1,6 +1,8 @@
+//pages/admin/bookings/index.tsx
 import { useEffect, useState } from "react";
 import BookingsTabHeader from "@/components/admin/bookings/BookingsTabHeader";
 import { Booking } from "@/types/booking";
+import BookingCard from "@/components/cards/BookingCard";
 
 export default function AdminBookings() {
   const [activeTab, setActiveTab] = useState("Pending");
@@ -32,32 +34,12 @@ export default function AdminBookings() {
       ) : filteredBookings.length === 0 ? (
         <p>No bookings in this section.</p>
       ) : (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">User</th>
-              <th className="p-2 border">Listing</th>
-              <th className="p-2 border">Dates</th>
-              <th className="p-2 border">Payment</th>
-              <th className="p-2 border">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredBookings.map((b) => (
-              <tr key={b.id} className="text-center border-b">
-                <td className="p-2 border">{b.id}</td>
-                <td className="p-2 border">{b.user.name}</td>
-                <td className="p-2 border">{b.listing.name}</td>
-                <td className="p-2 border">
-                  {b.start_date} → {b.end_date}
-                </td>
-                <td className="p-2 border">{b.payment_method}</td>
-                <td className="p-2 border">{b.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="space-y-4">
+  {filteredBookings.map((b) => (
+    <BookingCard key={b.id} booking={b} />
+  ))}
+</div>
+
       )}
     </div>
   );
