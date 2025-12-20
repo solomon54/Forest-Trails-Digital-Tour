@@ -215,7 +215,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 
       if (!res.ok) throw new Error("Booking failed");
 
-      showToast("Booking confirmed! 🎉", "success");
+      showToast("Booking Submited successfuly! 🎉", "success");
 
       // Reset form on success
       setFormData({

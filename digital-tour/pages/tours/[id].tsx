@@ -106,7 +106,7 @@ export default function TourPage() {
         <BookingForm
           listingId={listing.id}
           userId={user.id}
-          checkAvailability={checkAvailability} // <-- pass pre-check logic to form
+          // checkAvailability={checkAvailability} 
         />
       </div>
 
