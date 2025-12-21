@@ -1,6 +1,6 @@
 // pages/api/bookings/[id].ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Booking, User, Listing, BookingContact, Notification } from "@/models";
+import { Booking, User, Listing, Notification } from "@/models";
 import { sequelize } from "@/lib/db";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 
@@ -18,25 +18,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: [
           { model: User, as: "user", attributes: ["id", "name", "email"] },
           { model: Listing, as: "listing", attributes: ["id", "name", "location", "price"] },
-          { model: BookingContact, as: "contact" }
-        ]
+        ],
       });
-
-      if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
-
+      if (!booking) return res.status(404).json({ message: "Booking not found" });
       return res.status(200).json(booking);
     }
 
-    /* ===================== PUT ===================== */
+    /* ===================== PUT (ADMIN ACTIONS) ===================== */
     if (req.method === "PUT") {
       const { action } = req.body;
-      if (!action) {
-        return res.status(400).json({ message: "Missing action" });
+      if (!action || !["confirm", "reject", "cancel"].includes(action)) {
+        return res.status(400).json({ message: "Invalid or missing action" });
       }
 
-      /* ===== AUTH ===== */
+      // ===== AUTH =====
       const token = getTokenFromRequest(req);
       if (!token) return res.status(401).json({ message: "Unauthorized" });
 
@@ -47,79 +42,78 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ message: "Invalid token" });
       }
 
-      const booking = await Booking.findByPk(id);
-      if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
+      const result = await sequelize.transaction(async (t) => {
+        const booking = await Booking.findByPk(id, { 
+          transaction: t,
+          lock: t.LOCK.UPDATE 
+        });
 
-      /* ===== STATE GUARDS (NO TRANSACTION YET) ===== */
-      if (action === "confirm" && booking.status !== "pending") {
-        return res.status(409).json({ message: `Booking already ${booking.status}` });
-      }
+        if (!booking) throw new Error("NOT_FOUND");
 
-      if (action === "reject" && booking.status !== "pending") {
-        return res.status(409).json({ message: `Booking already ${booking.status}` });
-      }
+        // 🛠️ FIX 1: Explicitly fetch user_id and status from the instance
+        const currentStatus = booking.get('status');
+        const targetUserId = booking.get('user_id');
 
-      if (action === "cancel" && booking.status !== "confirmed") {
-        return res.status(409).json({ message: `Only confirmed bookings can be cancelled` });
-      }
+        if (!targetUserId) {
+          throw new Error("DATA_ERROR: Booking is missing user_id");
+        }
 
-      /* ===== TRANSACTION ===== */
-      const updatedBooking = await sequelize.transaction(async (t) => {
+        // 🛠️ FIX 2: State Guards
+        if ((action === "confirm" || action === "reject") && currentStatus !== "pending") {
+          throw new Error(`GUARD: Booking is already ${currentStatus}`);
+        }
+        if (action === "cancel" && currentStatus !== "confirmed") {
+          throw new Error("GUARD: Only confirmed bookings can be cancelled");
+        }
+
+        const updateData: any = {
+          status: action === "confirm" ? "confirmed" : action === "reject" ? "rejected" : "cancelled",
+        };
+
         if (action === "confirm") {
-          await booking.update(
-            {
-              status: "confirmed",
-              payment_status: "paid",
-              decided_by: admin.id,
-              decided_at: new Date()
-            },
-            { transaction: t }
-          );
+          updateData.payment_status = "paid";
+          updateData.decided_by = admin.id;
+          updateData.decided_at = new Date();
+        } else if (action === "reject") {
+          updateData.decided_by = admin.id;
+          updateData.decided_at = new Date();
+        } else if (action === "cancel") {
+          updateData.payment_status = "refunded";
         }
 
-        if (action === "reject") {
-          await booking.update(
-            {
-              status: "rejected",
-              decided_by: admin.id,
-              decided_at: new Date()
-            },
-            { transaction: t }
-          );
-        }
+        await booking.update(updateData, { transaction: t });
 
-        if (action === "cancel") {
-          await booking.update(
-            {
-              status: "cancelled",
-              payment_status: "refunded"
-            },
-            { transaction: t }
-          );
-        }
-
-        await Notification.create(
-          {
-            user_id: booking.user_id,
-            type: action === "confirm" ? "success" : action === "reject" ? "warning" : "info",
-            title: `Booking ${booking.status}`,
-            message: `Your booking has been ${booking.status}.`,
-            is_read: false
-          },
-          { transaction: t }
-        );
+        // 🛠️ FIX 3: Notification now has a guaranteed user_id
+        await Notification.create({
+          user_id: targetUserId,
+          type: action === "confirm" ? "success" : action === "reject" ? "warning" : "info",
+          title: `Booking ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+          message: `Your booking has been ${updateData.status}.`,
+          is_read: false,
+        }, { transaction: t });
 
         return booking;
       });
 
-      return res.status(200).json(updatedBooking);
+      return res.status(200).json(result);
     }
 
     return res.status(405).json({ message: "Method not allowed" });
-  } catch (error) {
-    console.error(error);
+
+  } catch (error: any) {
+    console.error("Server Error:", error);
+    
+    // Explicit error responses
+    if (error.message === "NOT_FOUND") {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    if (error.message.startsWith("GUARD")) {
+      return res.status(409).json({ message: error.message.split(": ")[1] });
+    }
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({ message: "Validation error", details: error.errors });
+    }
+
     return res.status(500).json({ message: "Internal server error" });
   }
 }

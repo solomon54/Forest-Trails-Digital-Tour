@@ -1,29 +1,37 @@
-// components/admin/BookingsTabHeader.tsx
+// components/admin/bookings/BookingsTabHeader.tsx
 import React from "react";
 
+export type BookingTab = "Pending" | "Approved" | "Rejected";
+
 interface TabHeaderProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: BookingTab;
+  setActiveTab: (tab: BookingTab) => void;
 }
 
-const tabs = ["Pending", "Rejected", "Approved"];
+const tabs: BookingTab[] = ["Pending", "Approved", "Rejected"];
 
-export default function BookingsTabHeader({ activeTab, setActiveTab }: TabHeaderProps) {
+export default function BookingsTabHeader({
+  activeTab,
+  setActiveTab,
+}: TabHeaderProps) {
   return (
-    <div className="flex gap-4 border-b mb-4">
-      {tabs.map((tab) => (
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={`px-4 py-2 font-medium rounded-t-lg transition
-            ${activeTab === tab
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-        >
-          {tab}
-        </button>
-      ))}
+    <div className="overflow-x-auto w-full border-b-1 border-emerald-800/20 mb-4">
+      <div className="flex gap-2 sm:gap-4 min-w-max">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 font-medium rounded-md transition duration-300 whitespace-nowrap
+              ${
+                activeTab === tab
+                  ? "bg-emerald-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-emerald-600/70"
+              }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
