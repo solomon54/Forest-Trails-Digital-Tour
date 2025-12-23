@@ -1,3 +1,4 @@
+//pages/api/notification/[id].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Notification, User } from '../../../models';
 
@@ -39,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const notification = await Notification.findByPk(id as string);
       if (!notification) return res.status(404).json({ message: 'Notification not found' });
 
-      await notification.update({ readed: true });
+      await notification.update({ is_read: true });
       return res.status(200).json(notification);
     }
 

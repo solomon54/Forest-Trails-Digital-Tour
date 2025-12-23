@@ -2,6 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Notification, User } from '@/models';
 import {sequelize} from '../../../lib/db';
+import { sendEmail } from "@/lib/email";
+import { pusher } from "@/lib/pusher";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method;
@@ -35,21 +37,43 @@ const notifications = await Notification.findAll({
     }
 
     if (method === 'POST') {
-      const { user_id, type, title, message } = req.body;
+  const { user_id, type, title, message } = req.body;
 
-      const newNotification = await Notification.create({
-        user_id,
-        type,
-        title,
-        message,
-        is_read: false,
-      });
+  // 1️⃣ Create notification in DB
+  const newNotification = await Notification.create({
+    user_id,
+    type,
+    title,
+    message,
+    is_read: false,
+  });
 
-      // Future: trigger email here
-      // sendEmail(user_id, title, message);
+  // 2️⃣ Get user email
+  const user = await User.findByPk(user_id);
+  if (user?.email) {
+    // 3️⃣ Send email
+    await sendEmail(
+      user.email,
+      title,
+      `<p>${message}</p>`
+    );
+  }
 
-      return res.status(201).json(newNotification);
+  // 4️⃣ Realtime push (per-user channel)
+  await pusher.trigger(
+    `private-user-${user_id}`,
+    "new-notification",
+    {
+      id: newNotification.id,
+      title,
+      message,
+      created_at: newNotification.created_at,
     }
+  );
+
+  return res.status(201).json(newNotification);
+}
+
 
     return res.status(405).json({ message: 'Method not allowed' });
   } catch (err: unknown) {
