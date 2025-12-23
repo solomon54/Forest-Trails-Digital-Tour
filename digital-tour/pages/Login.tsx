@@ -1,3 +1,4 @@
+//pages/Login.tsx
 import type { NextPage } from "next";
 import LoginForm from "@/components/auth/LoginForm";
 import Navbar from "@/components/navbar/Navbar";

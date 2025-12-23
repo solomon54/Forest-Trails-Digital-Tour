@@ -1,6 +1,4 @@
 //layuout/MainLayout.tsx
-import Link from "next/link";
-import UserMenu from "@/components/users/UserProfile";
 import Navbar from "../navbar/Navbar";
 import Footer from "./Footer";
 import { useState } from "react";
@@ -22,7 +20,7 @@ export default function AdminLayout({
         {/* MOBILE SIDEBAR TOGGLE */}
         <button
           onClick={() => setOpen(true)}
-          className="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white px-3 py-2 rounded shadow"
+          className="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white px-3 py-2 rounded shadow sm:mt-70"
         >
           ☰
         </button>

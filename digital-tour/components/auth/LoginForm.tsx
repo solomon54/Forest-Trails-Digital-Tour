@@ -1,3 +1,4 @@
+// components/auth/LoginForm.tsx   ← REVERTED TO SIMPLE REDIRECT (no forced admin redirect)
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "@/components/buttons/Button";
@@ -32,15 +33,14 @@ const LoginForm: React.FC = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
       if (!res.ok) {
+        const data = await res.json();
         setError(data.message || "Login failed");
         return;
       }
 
-      // Login success
-      router.replace(redirectTo); // 👈 THIS fixes everything
-
+      // Simple redirect — all users go to the intended page (usually home)
+      router.replace(redirectTo);
     } catch (err) {
       setError("Network error—please try again.");
     } finally {
