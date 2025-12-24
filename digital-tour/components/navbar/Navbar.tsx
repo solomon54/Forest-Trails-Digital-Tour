@@ -14,7 +14,6 @@ const Navbar = () => {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -34,14 +33,12 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Check if current path matches a link (exact or startsWith for /admin)
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     if (href === "/admin") return pathname.startsWith("/admin");
     return pathname.startsWith(href);
   };
 
-  // All possible links
   const guestLinks = [
     { label: "Home", href: "/" },
     { label: "Tours", href: "/tours" },
@@ -56,10 +53,7 @@ const Navbar = () => {
     ...(isAuthorizedAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
   ];
 
-  // Choose which set to use
   const baseLinks = user ? loggedInLinks : guestLinks;
-
-  // Filter: only show links that are NOT the current page
   const visibleLinks = baseLinks.filter((link) => !isActive(link.href));
 
   return (
@@ -67,10 +61,9 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
-          {/* Left: Hamburger (mobile) + Logo */}
-          <div className="flex items-center gap-8">
-            {/* Mobile Hamburger */}
-            <div className="md:hidden">
+          {/* Left: Logo + Mobile Hamburger */}
+          <div className="flex items-center">
+            <div className="md:hidden mr-4">
               <button
                 onClick={toggleMenu}
                 className="text-white text-3xl focus:outline-none"
@@ -80,7 +73,6 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Logo */}
             <Link href="/">
               <span className="text-white font-bold text-2xl cursor-pointer hover:text-emerald-200 transition">
                 ForestTrail
@@ -88,31 +80,32 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            {visibleLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <span
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-                    isActive(link.href)
-                      ? "bg-white/30 text-white font-bold"
-                      : "text-white hover:bg-white/20"
-                  }`}
-                >
-                  {link.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          {/* Right: User Menu (always visible if logged in) */}
+          {/* Right side: Links pushed right, UserMenu with gap only when present */}
           <div className="flex items-center">
+            {/* Desktop Links */}
+            <div className="hidden md:flex items-center space-x-6 mr-8">
+              {visibleLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <span
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                      isActive(link.href)
+                        ? "bg-white/30 text-white font-bold"
+                        : "text-white hover:bg-white/20"
+                    }`}
+                  >
+                    {link.label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            {/* User Menu - only shown if logged in */}
             {user && <UserMenu />}
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - unchanged */}
       {isOpen && (
         <div ref={mobileMenuRef} className="md:hidden bg-white shadow-xl border-t">
           <div className="px-6 pt-5 pb-8 space-y-4">
