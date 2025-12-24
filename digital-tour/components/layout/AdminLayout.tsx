@@ -1,46 +1,25 @@
-//layuout/MainLayout.tsx
-import Navbar from "../navbar/Navbar";
-import Footer from "./Footer";
-import { useState } from "react";
-import AdminSidebar from "../admin/AdminSidebar";
+// components/layout/AdminLayout.tsx
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/layout/Footer";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* TOP NAVBAR */}
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
-      <div className="flex flex-1">
-        {/* MOBILE SIDEBAR TOGGLE */}
-        <button
-          onClick={() => setOpen(true)}
-          className="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white px-3 py-2 rounded shadow sm:mt-70"
-        >
-          ☰
-        </button>
+      <div className="flex flex-1 overflow-hidden">
+       
+        <AdminSidebar />  
 
-        {/* SIDEBAR (mobile + desktop) */}
-        <AdminSidebar open={open} setOpen={setOpen} />
-
-        {/* MAIN CONTENT AREA */}
-        <main className="flex-1 ml-0 md:ml-64 p-6 transition-all duration-300">
-          {/* PAGE HEADER / TOOLS */}
-          <header className="flex justify-end mb-4">
-            {/* <UserMenu /> */}
-          </header>
-
-          {/* PAGE CONTENT */}
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10 pl-20 md:pl-20">
+            
+            {children}
+          </main>
+        </div>
       </div>
 
-      {/* FOOTER */}
       <Footer />
     </div>
   );

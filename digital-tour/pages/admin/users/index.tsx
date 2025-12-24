@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import UserList from "@/components/admin/users/UserList";
 import AdminRole from "@/components/admin/users/AdminRole";
+import AdminLayout from "@/components/layout/AdminLayout";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export interface AdminUser {
   id: number;
@@ -71,19 +73,21 @@ const [activeRevokeUserId, setActiveRevokeUserId] =
   }
 
   return (
+    <AdminLayout>
     <UserList
   users={users}
   renderActions={(user) => (
     <AdminRole
-      user={user}
-      currentUserId={currentUser.id}
-      currentUserIsSuperAdmin={currentUser.is_super_admin}
-      activeRevokeUserId={activeRevokeUserId}
-      setActiveRevokeUserId={setActiveRevokeUserId}
-      onUpdated={handleUpdate}
+    user={user}
+    currentUserId={currentUser.id}
+    currentUserIsSuperAdmin={currentUser.is_super_admin}
+    activeRevokeUserId={activeRevokeUserId}
+    setActiveRevokeUserId={setActiveRevokeUserId}
+    onUpdated={handleUpdate}
     />
   )}
 />
+  </AdminLayout>
 
   );
 }

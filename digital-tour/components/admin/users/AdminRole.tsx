@@ -1,6 +1,7 @@
 // components/admin/users/AdminRole.tsx
 import { useState } from "react";
 import { AdminUser } from "@/pages/admin/users";
+import { HiExclamationCircle } from "react-icons/hi";
 
 interface Props {
   user: AdminUser;
@@ -25,9 +26,15 @@ export default function AdminRole({
 
   const showRevoke = activeRevokeUserId === user.id;
 
-  const updateRole = async (payload: { role: "user" | "admin"; reason?: string }) => {
+  const updateRole = async (newRole: "user" | "admin") => {
     setLoading(true);
     setSuccessMessage(null);
+
+    const payload: { role: "user" | "admin"; reason?: string } = { role: newRole };
+    if (newRole === "user") {
+      payload.reason = reason.trim();
+    }
+
     try {
       const res = await fetch(`/api/admin/users/${user.id}`, {
         method: "PUT",
@@ -42,23 +49,20 @@ export default function AdminRole({
         return;
       }
 
-      // Update parent immediately
       onUpdated(data);
 
-      // Show subtle success message
       setSuccessMessage(
-        payload.role === "admin"
+        newRole === "admin"
           ? "Admin privileges granted ✅"
           : "Admin privileges revoked ✅"
       );
 
-      // Reset revoke state
+      // Reset form
       setActiveRevokeUserId(null);
       setReason("");
 
-      // Auto-hide success message
-      setTimeout(() => setSuccessMessage(null), 2000);
-    } catch {
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
       alert("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -73,19 +77,21 @@ export default function AdminRole({
   /* ===== GRANT ADMIN ===== */
   if (user.role === "user") {
     return (
-      <div className="flex flex-col items-start sm:items-end gap-1 relative">
+      <div className="relative">
         <button
           disabled={loading}
-          onClick={() => updateRole({ role: "admin" })}
-          className="rounded px-3 py-1 text-sm font-medium bg-blue-600/90 text-white hover:bg-blue-700 transition disabled:opacity-60"
+          onClick={() => updateRole("admin")}
+          className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-60 shadow-sm"
         >
-          {loading ? "Granting..." : "Grant admin"}
+          {loading ? "Granting..." : "Grant Admin"}
         </button>
 
         {successMessage && (
-          <span className="absolute top-full mt-1 text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded animate-fade-in">
-            {successMessage}
-          </span>
+          <div className="absolute -top-12 left-0 sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-auto">
+            <span className="inline-block text-sm font-medium text-green-700 bg-green-100 px-4 py-2 rounded-lg shadow-lg">
+              {successMessage}
+            </span>
+          </div>
         )}
       </div>
     );
@@ -94,69 +100,93 @@ export default function AdminRole({
   /* ===== PROTECTED STATES ===== */
   if (isSuperAdmin || isSelf) {
     return (
-      <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-800">
-        {isSuperAdmin ? "Super admin (protected)" : "Cannot revoke yourself"}
-      </span>
+      <div className="w-full sm:w-auto">
+        <span className="inline-flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto px-3 py-2 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
+          <HiExclamationCircle className="text-lg shrink-0" />
+          <span className="text-center sm:text-left">
+            {isSuperAdmin ? "Super Admin (protected)" : "Cannot revoke yourself"}
+          </span>
+        </span>
+      </div>
     );
   }
 
-  /* ===== REVOKE ADMIN ===== */
+  /* ===== REVOKE ADMIN (with required reason) ===== */
   return (
-    <div className="flex flex-col items-start sm:items-end gap-1 relative w-full sm:w-auto">
+    <div className="relative w-full">
       {!showRevoke && (
         <button
           onClick={() => setActiveRevokeUserId(user.id)}
-          className="rounded px-3 py-1 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-60"
           disabled={loading}
+          className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition shadow-sm"
         >
-          Revoke admin
+          Revoke Admin
         </button>
       )}
 
       {showRevoke && (
-        <div className="mt-2 sm:mt-0 w-full sm:w-80 rounded-lg border border-red-200 bg-red-50 p-3 space-y-3 shadow-sm">
-          <p className="text-sm font-semibold text-red-800">
-            Confirm admin revocation
-          </p>
+        <div className="w-full p-4 sm:p-6 bg-red-50 border border-red-300 rounded-xl shadow-lg space-y-4 sm:space-y-5">
+          {/* Warning Header */}
+          <div className="flex items-start gap-3">
+            <HiExclamationCircle className="text-2xl sm:text-3xl text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-red-900 text-base md:text-xs">
+                Revoke Admin Privileges
+              </p>
+              <p className="text-sm text-red-800 mt-1">
+                <strong>{user.name || user.email}</strong> will immediately lose all admin access.
+              </p>
+            </div>
+          </div>
 
-          <textarea
-            rows={3}
-            disabled={loading}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Reason (required)"
-            className="w-full resize-none rounded border border-red-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-300 disabled:bg-gray-100"
-          />
+          {/* Reason Field - Required */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              Reason for revocation <span className="text-red-600">*</span>
+            </label>
+            <textarea
+              rows={3}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g., Inactive for 6+ months, role no longer needed, security concern..."
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 resize-none transition"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              This reason will be logged for audit purposes.
+            </p>
+          </div>
 
-          <div className="flex justify-end gap-2">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-3">
             <button
               onClick={() => {
                 setActiveRevokeUserId(null);
                 setReason("");
               }}
               disabled={loading}
-              className="rounded bg-gray-500 text-gray-50 px-3 py-1 text-sm hover:bg-gray-400 disabled:opacity-60 transition"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition order-2 sm:order-1"
             >
               Cancel
             </button>
 
             <button
               disabled={!reason.trim() || loading}
-              onClick={() =>
-                updateRole({ role: "user", reason: reason.trim() })
-              }
-              className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60 transition"
+              onClick={() => updateRole("user")}
+              className="w-full sm:w-auto px-4 sm:px-6 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition shadow-sm order-1 sm:order-2"
             >
-              {loading ? "Revoking..." : "Confirm"}
+              {loading ? "Revoking..." : "Confirm & Revoke"}
             </button>
           </div>
         </div>
       )}
 
       {successMessage && (
-        <span className="absolute top-full mt-1 text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded animate-fade-in">
-          {successMessage}
-        </span>
+        <div className="absolute -top-12 left-0 sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-auto">
+          <span className="inline-block text-sm font-medium text-green-700 bg-green-100 px-4 py-2 rounded-lg shadow-lg">
+            {successMessage}
+          </span>
+        </div>
       )}
     </div>
   );

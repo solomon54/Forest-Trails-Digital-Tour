@@ -1,79 +1,117 @@
-//componrnts/admin/AdminSidebar.tsx
+// components/admin/AdminSidebar.tsx
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
+import {
+  HiChevronLeft,
+  HiChevronRight,
+  HiHome,
+  HiUsers,
+  HiCalendar,
+  HiBell,
+  HiFolder,
+} from "react-icons/hi";
 
 const menuItems = [
-  { label: "Dashboard", path: "/admin" },
-  { label: "Users", path: "/admin/users" },
-  { label: "Bookings", path: "/admin/bookings" },
-  { label: "Notifications", path: "/admin/notifications" },
-  { label: "Reviews", path: "/admin/reviews" },
-  { label: "Resources", path: "/admin/resources" },
+  { label: "Dashboard", path: "/admin", icon: HiHome },
+  { label: "Users", path: "/admin/users", icon: HiUsers },
+  { label: "Bookings", path: "/admin/bookings", icon: HiCalendar },
+  { label: "Notifications", path: "/admin/notifications", icon: HiBell },
+  { label: "Resources", path: "/admin/resources", icon: HiFolder },
 ];
 
-export default function AdminSidebar({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (value: boolean) => void;
-}) {
-  const router = useRouter();
+export default function AdminSidebar() {
+  const pathname = usePathname();
+  const [expanded, setExpanded] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const isActive = (path: string) => router.pathname === path;
+  // Detect mobile vs desktop
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setExpanded(false); // Collapsed on mobile by default
+      } else {
+        setExpanded(true); // Expanded on desktop by default
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isActive = (path: string) => {
+    if (path === "/admin") return pathname === "/admin";
+    return pathname.startsWith(path);
+  };
 
   return (
-    <>
-      {/* BACKDROP */}
-      {/* Only visible on mobile when sidebar is open */}
-      <div
-        className={`
-          fixed inset-0 bg-black/40 backdrop-blur-sm z-40
-          transition-opacity duration-300 md:hidden
-          ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
-        `}
-        onClick={() => setOpen(false)}
-      />
-
-      {/* SIDEBAR PANEL */}
-      <aside
-        className={`
-          h-screen bg-blend-soft-light text-gray-600 shadow-lg flex flex-col p-4 w-64
-          fixed md:relative top-0 left-0 z-50
-          transition-transform duration-300 ease-in-out
-
-          ${open ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0
-        `}
-      >
-        {/* Close button for mobile */}
-        <button
-          onClick={() => setOpen(false)}
-          className="md:hidden mb-4 text-xl self-end"
+    <aside
+      className={`
+        h-auto flex flex-col
+        bg-white shadow-xl
+        transition-all duration-300 ease-in-out
+        z-30 left-0  
+        ${isMobile ? "fixed" : "sticky"} 
+        ${expanded ? "w-64" : "w-16"}
+      `}
+    >
+      {/* Header */}
+      <div className="h-16 bg-linear-to-r from-indigo-600 to-violet-600 flex items-center justify-between px-4 shadow-md shrink-0">
+        <h2
+          className={`text-xl font-bold text-white overflow-hidden transition-all duration-300 ${
+            expanded ? "w-40 opacity-100" : "w-0 opacity-0"
+          }`}
         >
-          ✖
-        </button>
+          Admin Panel
+        </h2>
 
-        {/* MENU */}
-        <nav className="flex flex-col gap-2 mt-2">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              href={item.path}
-              onClick={() => setOpen(false)} // auto close on mobile
-              className={`px-4 py-2 rounded-lg  font-medium transition
-                ${
-                  isActive(item.path)
-                    ? "bg-blue-600 text-gray-200 shadow"
-                    : "hover:bg-blue-200"
-                }
-              `}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-    </>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-white text-2xl hover:bg-white/20 rounded-lg p-1 transition-all shrink-0"
+          aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {expanded ? <HiChevronLeft /> : <HiChevronRight />}
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-6 overflow-y-auto">
+        <ul className="space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.path}>
+                <Link
+                  href={item.path}
+                  className={`
+                    flex items-center gap-4 px-3 py-3 rounded-lg font-medium text-sm transition-all
+                    ${
+                      isActive(item.path)
+                        ? "bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    }
+                  `}
+                  onClick={() => {
+                    if (isMobile) setExpanded(false);
+                  }}
+                >
+                  <Icon className="text-xl shrink-0" />
+                  <span
+                    className={`overflow-hidden transition-all duration-300 whitespace-nowrap ${
+                      expanded ? "w-32 opacity-100" : "w-0 opacity-0"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </aside>
   );
 }
