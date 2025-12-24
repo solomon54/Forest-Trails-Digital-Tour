@@ -1,132 +1,135 @@
-// components/navbar/Navbar.tsx   
-import { useState } from "react";
+// components/navbar/Navbar.tsx
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { HiMenu, HiX } from "react-icons/hi";
 import UserMenu from "../users/UserProfile";
 import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isAuthorizedAdmin } = useAuth(); 
+  const pathname = usePathname();
+  const { user, isAuthorizedAdmin } = useAuth();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Base links for everyone
-  const publicLinks = [
+  // Close when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  // Check if current path matches a link (exact or startsWith for /admin)
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href === "/admin") return pathname.startsWith("/admin");
+    return pathname.startsWith(href);
+  };
+
+  // All possible links
+  const guestLinks = [
     { label: "Home", href: "/" },
     { label: "Tours", href: "/tours" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { label: "Login", href: "/Login" },
+    { label: "Signup", href: "/Signup" },
   ];
 
+  const loggedInLinks = [
+    { label: "Home", href: "/" },
+    { label: "Tours", href: "/tours" },
+    { label: "Upload Tours", href: "/uploads" },
+    ...(isAuthorizedAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
+  ];
+
+  // Choose which set to use
+  const baseLinks = user ? loggedInLinks : guestLinks;
+
+  // Filter: only show links that are NOT the current page
+  const visibleLinks = baseLinks.filter((link) => !isActive(link.href));
+
   return (
-    <nav className="bg-linear-to-l from-indigo-300 to-violet-600 shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
+    <nav className="bg-gradient-to-l from-indigo-600 to-violet-600 shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="shrink-0">
+
+          {/* Left: Hamburger (mobile) + Logo */}
+          <div className="flex items-center gap-8">
+            {/* Mobile Hamburger */}
+            <div className="md:hidden">
+              <button
+                onClick={toggleMenu}
+                className="text-white text-3xl focus:outline-none"
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <HiX /> : <HiMenu />}
+              </button>
+            </div>
+
+            {/* Logo */}
             <Link href="/">
-              <span className="text-emerald-100 font-bold text-2xl cursor-pointer">
-                TravelX
+              <span className="text-white font-bold text-2xl cursor-pointer hover:text-emerald-200 transition">
+                ForestTrail
               </span>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-3 items-center">
-            {publicLinks.map((link) => (
+          {/* Desktop Links */}
+          <div className="hidden md:flex items-center space-x-6">
+            {visibleLinks.map((link) => (
               <Link key={link.href} href={link.href}>
-                <span className="text-gray-100 hover:bg-emerald-600 font-medium cursor-pointer rounded-md px-2 py-1.5">
+                <span
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                    isActive(link.href)
+                      ? "bg-white/30 text-white font-bold"
+                      : "text-white hover:bg-white/20"
+                  }`}
+                >
                   {link.label}
                 </span>
               </Link>
             ))}
-
-            {/* Conditional Admin Panel link */}
-            {isAuthorizedAdmin && (
-              <Link href="/admin">   {/* ← adjust path if your admin root is different */}
-                <span className="text-gray-100 hover:bg-emerald-600 font-medium cursor-pointer rounded-md px-2 py-1.5">
-                  Admin Panel
-                </span>
-              </Link>
-            )}
-
-            {/* Auth states */}
-            {!user ? (
-              <>
-                <Link href="/Login">
-                  <button className="px-5 py-2 bg-emerald-600 text-gray-200 rounded-xl hover:bg-emerald-500 transition">
-                    Login
-                  </button>
-                </Link>
-                <Link href="/Signup">
-                  <button className="px-5 py-2 border border-emerald-600 text-gray-200 rounded-xl hover:bg-emerald-500 transition">
-                    Signup
-                  </button>
-                </Link>
-              </>
-            ) : (
-              <UserMenu />
-            )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-2xl text-slate-700">
-              {isOpen ? <HiX /> : <HiMenu />}
-            </button>
+          {/* Right: User Menu (always visible if logged in) */}
+          <div className="flex items-center">
+            {user && <UserMenu />}
           </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white shadow-md">
-          <div className="px-4 pt-4 pb-4 space-y-2">
-            {publicLinks.map((link) => (
+        <div ref={mobileMenuRef} className="md:hidden bg-white shadow-xl border-t">
+          <div className="px-6 pt-5 pb-8 space-y-4">
+            {visibleLinks.map((link) => (
               <Link key={link.href} href={link.href}>
                 <span
                   onClick={() => setIsOpen(false)}
-                  className="block text-slate-700 hover:text-emerald-600 font-medium cursor-pointer"
+                  className={`block text-lg font-medium py-3 px-4 rounded-md transition ${
+                    isActive(link.href)
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "text-gray-800 hover:bg-gray-100"
+                  }`}
                 >
                   {link.label}
                 </span>
               </Link>
             ))}
-
-            {isAuthorizedAdmin && (
-              <Link href="/admin/users">
-                <span
-                  onClick={() => setIsOpen(false)}
-                  className="block text-slate-700 hover:text-emerald-600 font-medium cursor-pointer"
-                >
-                  Admin Panel
-                </span>
-              </Link>
-            )}
-
-            {!user ? (
-              <>
-                <Link href="/Login">
-                  <span
-                    onClick={() => setIsOpen(false)}
-                    className="block px-5 py-2 bg-emerald-600 text-white rounded-xl text-center"
-                  >
-                    Login
-                  </span>
-                </Link>
-                <Link href="/Signup">
-                  <span
-                    onClick={() => setIsOpen(false)}
-                    className="block px-5 py-2 border border-emerald-600 text-emerald-600 rounded-xl text-center"
-                  >
-                    Signup
-                  </span>
-                </Link>
-              </>
-            ) : (
-              <UserMenu />
-            )}
           </div>
         </div>
       )}

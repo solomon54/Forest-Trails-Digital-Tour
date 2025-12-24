@@ -5,9 +5,9 @@ import { getAllListings } from "@/services/listingService";
 import { Listing } from "@/types/admin";
 import CardSkeleton from "@/components/skelotons/CardSkeleton";
 import Link from "next/link";
-import UserMenu from "@/components/users/UserProfile";
 import Footer from "@/components/layout/Footer";
 import { MdLocationOn } from "react-icons/md";
+import Navbar from "@/components/navbar/Navbar";
 
 const getMediaType = (
   url: string | null | undefined
@@ -79,7 +79,7 @@ export default function ToursListingPage() {
 
   return (
     <main className="bg-gray-100 p-4 sm:p-0">
-      <UserMenu />
+      <Navbar />
 
       {/* Page Header – CLEAN & CALM */}
       <section className="max-w-7xl mx-auto px-4 pt-12 pb-8">

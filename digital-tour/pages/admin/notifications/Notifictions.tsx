@@ -1,4 +1,4 @@
-//pages/dashboards/Notifictions.tsx
+//pages/admin/notifications/Notifictions.tsx
 import {useAuth} from "@/hooks/useAuth";
 import {useNotifications} from "@/hooks/useNotifications";
 

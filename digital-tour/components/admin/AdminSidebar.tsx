@@ -6,7 +6,7 @@ const menuItems = [
   { label: "Dashboard", path: "/admin" },
   { label: "Users", path: "/admin/users" },
   { label: "Bookings", path: "/admin/bookings" },
-  { label: "Properties", path: "/admin/properties" },
+  { label: "Notifications", path: "/admin/notifications" },
   { label: "Reviews", path: "/admin/reviews" },
   { label: "Resources", path: "/admin/resources" },
 ];

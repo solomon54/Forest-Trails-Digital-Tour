@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Notification, User } from '@/models';
 import {sequelize} from '../../../lib/db';
-import { sendEmail } from "@/lib/email";
+// import { sendEmail } from "@/lib/email";
 import { pusher } from "@/lib/pusher";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
