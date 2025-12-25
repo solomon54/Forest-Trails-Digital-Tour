@@ -86,11 +86,11 @@ export default function AdminRole({
   /* ===== GRANT ADMIN ===== */
   if (user.role === "user") {
     return (
-      <div className="relative">
+      <div className="relative flex justify-center ">
         <button
           disabled={loading}
           onClick={() => updateRole("admin")}
-          className="w-full px-4 py-2.5 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 shadow-sm transition"
+          className="min-w-2/3 px-4 py-2.5 text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60 shadow-sm transition"
         >
           {loading ? "Granting..." : "Grant Admin"}
         </button>
