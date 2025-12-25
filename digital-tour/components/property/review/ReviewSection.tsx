@@ -65,40 +65,40 @@ export default function ReviewSection({ listingId }: ReviewSectionProps) {
   }, [fetchReviews, page]);
 
   return (
-    <section className="mt-12">
-      <h2 className="text-2xl font-semibold mb-4">Guest Reviews</h2>
+  <section className="mt-12">
+    <div className="max-w-4xl mx-auto px-4">
+      <h2 className="text-2xl font-semibold mb-4">
+        Guest Reviews
+      </h2>
 
-      {/* ⭐ Auth-aware Review Form */}
-      <ReviewForm
-        listingId={listingId}
-        onSuccess={() => fetchReviews(page)}
-      />
+      {/* Review Form */}
+      <div className="mb-6">
+        <ReviewForm
+          listingId={listingId}
+          onSuccess={() => fetchReviews(page)}
+        />
+      </div>
 
-      {loading && (
-        <p className="text-gray-500">Loading reviews...</p>
-      )}
-
-      {!loading && reviews.length === 0 && (
+      {loading ? (
+        <ReviewSkeleton count={5} />
+      ) : reviews.length === 0 ? (
         <p className="italic text-gray-500">
           No reviews yet. Be the first!
         </p>
+      ) : (
+        <ReviewList reviews={reviews} />
       )}
-
-     {loading ? (
-  <ReviewSkeleton count={5} />
-) : reviews.length === 0 ? (
-  <p className="italic text-gray-500">No reviews yet. Be the first!</p>
-) : (
-  <ReviewList reviews={reviews} />
-)}
 
       {meta && meta.totalPages > 1 && (
-        <ReviewPagination
-          currentPage={meta.page}
-          totalPages={meta.totalPages}
-          onPageChange={setPage}
-        />
+        <div className="mt-6">
+          <ReviewPagination
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={setPage}
+          />
+        </div>
       )}
-    </section>
-  );
+    </div>
+  </section>
+);
 }

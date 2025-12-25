@@ -34,6 +34,7 @@ const Navbar = () => {
   }, [isOpen]);
 
   const isActive = (href: string) => {
+    if (!pathname) return false;
     if (href === "/") return pathname === "/";
     if (href === "/admin") return pathname.startsWith("/admin");
     return pathname.startsWith(href);
@@ -49,7 +50,7 @@ const Navbar = () => {
   const loggedInLinks = [
     { label: "Home", href: "/" },
     { label: "Tours", href: "/tours" },
-    { label: "Upload Tours", href: "/uploads" },
+    { label: "Upload Sites", href: "/uploads" },
     ...(isAuthorizedAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
   ];
 

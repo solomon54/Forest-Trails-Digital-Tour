@@ -57,7 +57,7 @@ export default async function handler(
     return res.status(400).json({ message: "Invalid role value", received: newRole });
   }
 
-  // === Critical protection: never allow demoting a super admin (covers self + others) ===
+  // === Critical protection: never allow demoting a super admin ===
   if (newRole === "user" && user.is_super_admin) {
     return res.status(403).json({ message: "Cannot revoke privileges from a super administrator" });
   }
@@ -67,12 +67,7 @@ export default async function handler(
     if (user.role === "admin") {
       return res.status(400).json({ message: "User is already an administrator" });
     }
-
     user.role = "admin";
-    await user.save();
-
-    console.log(`[ADMIN GRANT] User ID ${userId} granted admin by Super Admin ID ${currentUser.id}`);
-    return res.status(200).json({ message: "Admin granted successfully" });
   }
 
   // === Revoke admin ===
@@ -86,13 +81,23 @@ export default async function handler(
     }
 
     user.role = "user";
-    await user.save();
-
-    console.log(
-      `[ADMIN REVOKE] User ID ${userId} revoked by Super Admin ID ${currentUser.id}, reason: "${reason.trim()}"`
-    );
-    return res.status(200).json({ message: "Admin revoked successfully" });
   }
 
-  return res.status(400).json({ message: "Invalid operation" });
+  // === Save and return the FULL updated user ===
+  await user.save();
+
+  const updatedUser = await User.findByPk(userId, {
+    attributes: [
+      "id",
+      "name",
+      "email",
+      "role",
+      "is_super_admin",
+      "photo_url",
+      "created_at",
+      "updated_at",
+    ],
+  });
+
+  return res.status(200).json(updatedUser);
 }

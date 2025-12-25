@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import UserList from "@/components/admin/users/UserList";
 import AdminRole from "@/components/admin/users/AdminRole";
 import AdminLayout from "@/components/layout/AdminLayout";
-import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export interface AdminUser {
   id: number;
@@ -20,41 +19,56 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
-const [activeRevokeUserId, setActiveRevokeUserId] =
-  useState<number | null>(null);
+  const [activeRevokeUserId, setActiveRevokeUserId] = useState<number | null>(null);
+
+  const fetchUsers = async () => {
+    try {
+      const usersRes = await fetch("/api/admin/users");
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        setUsers(usersData);
+      }
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const meRes = await fetch("/api/auth/me");
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        setCurrentUser(meData);
+      }
+    } catch (err) {
+      console.error("Failed to fetch current user:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [usersRes, meRes] = await Promise.all([
-          fetch("/api/admin/users"),
-          fetch("/api/auth/me"),
-        ]);
-
-        if (usersRes.ok) {
-          const usersData = await usersRes.json();
-          setUsers(usersData);
-        }
-
-        if (meRes.ok) {
-          const meData = await meRes.json();
-          setCurrentUser(meData);
-        }
-      } catch (err) {
-        console.error("Failed to load admin data:", err);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      await Promise.all([fetchUsers(), fetchCurrentUser()]);
+      setLoading(false);
     };
 
     fetchData();
   }, []);
+
+  // New: Full refresh function
+  const refreshUsers = async () => {
+    setLoading(true); // optional: show spinner again briefly
+    await fetchUsers();
+    setLoading(false);
+  };
 
   const handleUpdate = (updated: AdminUser) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === updated.id ? updated : u))
     );
   };
+
+ 
 
   if (loading) {
     return (
@@ -74,20 +88,20 @@ const [activeRevokeUserId, setActiveRevokeUserId] =
 
   return (
     <AdminLayout>
-    <UserList
-  users={users}
-  renderActions={(user) => (
-    <AdminRole
-    user={user}
-    currentUserId={currentUser.id}
-    currentUserIsSuperAdmin={currentUser.is_super_admin}
-    activeRevokeUserId={activeRevokeUserId}
-    setActiveRevokeUserId={setActiveRevokeUserId}
-    onUpdated={handleUpdate}
-    />
-  )}
-/>
-  </AdminLayout>
-
+      <UserList
+        users={users}
+        renderActions={(user) => (
+          <AdminRole
+            user={user}
+            currentUserId={currentUser.id}
+            currentUserIsSuperAdmin={currentUser.is_super_admin}
+            activeRevokeUserId={activeRevokeUserId}
+            setActiveRevokeUserId={setActiveRevokeUserId}
+            // Change this line:
+            onUpdated={handleUpdate} // ← now refreshes from server
+          />
+        )}
+      />
+    </AdminLayout>
   );
 }

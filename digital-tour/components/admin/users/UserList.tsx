@@ -32,7 +32,7 @@ export default function UserList({ users, renderActions }: Props) {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 tab === t
                   ? "bg-white text-indigo-700 shadow-sm"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
@@ -88,29 +88,29 @@ export default function UserList({ users, renderActions }: Props) {
                         className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-100"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-full bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-xl ring-4 ring-gray-100">
+                      <div className="w-16 h-16 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xl ring-4 ring-gray-100">
                         {initials || "?"}
                       </div>
                     )}
 
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg text-gray-900 truncate">{name}</h3>
-                      <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                    </div>
-                  </div>
-
-                  {/* Metadata */}
-                  <div className="space-y-2 text-sm text-gray-600 mb-5">
-                    <p>
-                      <span className="font-medium">Joined:</span>{" "}
+                     <p className="text-gray-400 text-sm">
+                      <span className="font-medium ">Joined:</span>{" "}
                       {new Date(user.created_at).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "long",
                         year: "numeric",
                       })}
-                    </p>
+                    </p></div>
                   </div>
 
+                   
+                  {/* Metadata */}
+                  <div className="space-y-2 text-sm text-gray-600 mb-5 transition-all duration-300 font-medium">
+                      <p>Email: <span className="text-indigo-400 cursor-pointer hover:text-indigo-500 text hover:underline">{user.email}</span></p>
+
+                  </div>
                   {/* Role Badges */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     <span

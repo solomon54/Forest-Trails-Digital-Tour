@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import PropertyDetail from "@/components/property/PropertyDetail";
 import CardSkeleton from "@/components/skelotons/CardSkeleton";
 import Footer from "@/components/layout/Footer";
-import UserMenu from "@/components/users/UserProfile";
+
 import BookingForm from "@/components/property/booking/BookingForm";
 import { getListingById } from "@/services/listingService";
 import { useAuth } from "@/hooks/useAuth";
-import axios from "axios";
+import Navbar from "@/components/navbar/Navbar";
+
 
 // --- Interface ---
 interface ListingDetail {
@@ -79,38 +80,23 @@ export default function TourPage() {
     );
   }
 
-  // --- Check availability before showing booking form ---
-  const checkAvailability = async (start_date: string, end_date: string) => {
-    try {
-      const { data } = await axios.post("/api/bookings/check-availability", {
-        listing_id: listing.id,
-        start_date,
-        end_date,
-      });
-      setAvailabilityMessage(data.available ? null : "This listing is already booked for the selected dates.");
-      return data.available;
-    } catch (err: any) {
-      console.error("Availability check failed", err);
-      setAvailabilityMessage("Failed to check availability. Please try again.");
-      return false;
-    }
-  };
+
 
   return (
     <div className="bg-neutral-50 text-slate-900 font-inter">
-      <UserMenu />
+
+    <Navbar/>
+
       <PropertyDetail property={listing} />
 
-      {/* --- Booking Form with Availability Check --- */}
+      {/* --- Booking Form */}
       <div id="bookingForm" className="mt-6">
         <BookingForm
           listingId={listing.id}
           userId={user.id}
-          // checkAvailability={checkAvailability} 
-        />
+          />
       </div>
 
-      {/* <ReviewSection listingId={listing.id} reviews={listing.reviews} /> */}
       <Footer />
     </div>
   );

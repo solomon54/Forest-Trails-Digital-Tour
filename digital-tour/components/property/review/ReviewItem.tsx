@@ -22,74 +22,87 @@ interface ReviewItemProps {
 }
 
 export default function ReviewItem({ review }: ReviewItemProps) {
-  const name = review.reviewUser?.name || "Anonymous";
+  const name = review.reviewUser?.name?.trim() || "Anonymous Traveler";
   const [imageError, setImageError] = useState(false);
 
   const initials = name
-    .trim()
     .split(" ")
-    .map((n) => n[0])
+    .filter(Boolean)
+    .map((n) => n[0].toUpperCase())
     .slice(0, 2)
-    .join("")
-    .toUpperCase();
+    .join("");
 
-  const showImage = !!review.reviewUser?.photo_url && !imageError;
+  const hasPhoto = !!review.reviewUser?.photo_url && !imageError;
 
-  // Split comment into paragraphs
+  // Split comment into paragraphs (support \n\n or multiple newlines)
   const paragraphs = review.comment
-    ? review.comment.split(/\n+/).map((p) => p.trim()).filter(Boolean)
+    ? review.comment.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
     : [];
 
   return (
-    <li className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        {/* User Avatar */}
-        <div className="shrink-0">
-          {showImage ? (
-            <div className="relative w-12 h-12 rounded-full overflow-hidden">
-              <Image
-                src={review.reviewUser!.photo_url!}
-                alt={name}
-                fill
-                className="object-cover"
-                onError={() => setImageError(true)}
-              />
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-600">
-              {initials || <FaUserCircle className="w-8 h-8 text-gray-400" />}
-            </div>
-          )}
-        </div>
-
-        {/* Review Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <p className="font-semibold text-gray-900 truncate">{name}</p>
-              <p className="text-sm text-gray-500">
-                {review.relativeTime || "Just now"}
-              </p>
-            </div>
-            <StarRatingDisplay rating={review.rating} size="medium" showValue />
+    <li className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden">
+      <div className="p-6">
+        <div className="flex flex-col sm:flex-row gap-5">
+          {/* Avatar */}
+          <div className="flex-shrink-0 self-start">
+            {hasPhoto ? (
+              <div className="relative w-14 h-14 rounded-full overflow-hidden ring-4 ring-gray-100">
+                <Image
+                  src={review.reviewUser!.photo_url!}
+                  alt={name}
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                  onError={() => setImageError(true)}
+                  priority={false}
+                />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg ring-4 ring-gray-100">
+                {initials || <FaUserCircle className="w-10 h-10 text-white/90" />}
+              </div>
+            )}
           </div>
 
-          {/* Comment with quotes */}
-          {paragraphs.length > 0 && (
-            <blockquote className="relative text-gray-700 pl-5 border-l-6 border-emerald-700/80 italic ">
-              <span className="absolute -left-0 top-0 text-3xl text-emerald-600 font-serif font-semibold">
-                “
-              </span>
-              <div className="flex flex-col gap-2 text-sm sm:text-base leading-relaxed wrap-break-word">
-                {paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Header: Name, Time, Rating */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
+              <div>
+                <h4 className="font-semibold text-lg text-gray-900">{name}</h4>
+                <time className="text-sm text-gray-500">
+                  {review.relativeTime || "Recently"}
+                </time>
               </div>
-              <span className="absolute -right-1 bottom-0 text-3xl text-emerald-600 font-serif font-semibold">
-                ”
-              </span>
-            </blockquote>
-          )}
+
+              <StarRatingDisplay rating={review.rating} size="large" showValue />
+            </div>
+
+            {/* Review Text */}
+            {paragraphs.length > 0 ? (
+              <div className="relative pl-6">
+                {/* Left quote */}
+                <span className="absolute left-0 top-1 text-5xl text-emerald-200 font-serif leading-none">
+                  “
+                </span>
+
+                <div className="space-y-3 text-gray-700 text-base leading-relaxed italic">
+                  {paragraphs.map((paragraph, i) => (
+                    <p key={i} className="relative">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+
+                {/* Right quote */}
+                <span className="absolute -bottom-4 right-0 text-5xl text-emerald-200 font-serif leading-none">
+                  ”
+                </span>
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">No written review.</p>
+            )}
+          </div>
         </div>
       </div>
     </li>

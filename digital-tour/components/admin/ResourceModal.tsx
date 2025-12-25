@@ -153,11 +153,11 @@ export default function ResourceModal({
           <button
             onClick={onClose}
             disabled={busy}
-            className="text-gray-400 hover:text-gray-600 text-3xl leading-none disabled:opacity-50 transition-transform hover:scale-110"
+            className="text-gray-600 hover:text-red-600 text-3xl leading-none disabled:opacity-50 transition-transform hover:scale-110"
             aria-label="Close modal"
             type="button"
           >
-            ×
+            &times;
           </button>
         </div>
 
@@ -214,7 +214,7 @@ export default function ResourceModal({
           </div>
 
           {/* Form - Takes full width on mobile, 2/3 on desktop */}
-          <div className="lg:col-span-2 xl:order-1 space-y-6">
+          <div className="lg:col-span-2 text-gray-500 xl:order-1 space-y-6">
             <div className="grid grid-cols-1 gap-5">
               <div>
                 <label htmlFor="caption-input" className="block text-sm font-semibold text-gray-800 mb-1.5">
@@ -226,7 +226,7 @@ export default function ResourceModal({
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
                   disabled={busy}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 transition text-sm md:text-base"
+                  className="w-full  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/70 disabled:bg-gray-100 transition text-sm md:text-base"
                   placeholder="Enter a descriptive caption"
                 />
               </div>
@@ -241,7 +241,7 @@ export default function ResourceModal({
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={busy}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 resize-y transition text-sm md:text-base"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/70 disabled:bg-gray-100 resize-y transition text-sm md:text-base"
                   placeholder="Provide detailed description of the resource"
                 />
               </div>
@@ -261,7 +261,7 @@ export default function ResourceModal({
                     }}
                     disabled={busy}
                     className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-100 transition text-sm md:text-base ${
-                      locationError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-indigo-500"
+                      locationError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-emerald-600/70"
                     }`}
                     placeholder="e.g., New York, USA"
                   />
@@ -291,7 +291,7 @@ export default function ResourceModal({
                       }}
                       disabled={busy}
                       className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-100 transition text-sm md:text-base ${
-                        priceError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-indigo-500"
+                        priceError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-emerald-600/70"
                       }`}
                       placeholder="0.00"
                     />
@@ -344,7 +344,7 @@ export default function ResourceModal({
                 className={`flex-1 px-6 py-3.5 font-medium rounded-lg transition shadow-sm text-sm md:text-base ${
                   canApprove
                     ? "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-emerald-600 text-gray-100 cursor-not-allowed opacity-60"
                 }`}
                 type="button"
               >
@@ -357,7 +357,7 @@ export default function ResourceModal({
                 className={`flex-1 px-6 py-3.5 font-medium rounded-lg transition shadow-sm text-sm md:text-base ${
                   canReject
                     ? "bg-red-600 text-white hover:bg-red-700 active:bg-red-800"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-red-600 text-gray-100 cursor-not-allowed opacity-60"
                 }`}
                 type="button"
               >

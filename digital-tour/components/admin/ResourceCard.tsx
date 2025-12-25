@@ -163,7 +163,7 @@ export default function ResourceCard({
                 px-6 py-3 text-sm font-medium rounded-lg transition-all shadow-sm
                 ${isDisabled
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95"
                 }
               `}
             >
