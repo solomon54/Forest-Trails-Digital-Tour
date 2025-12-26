@@ -66,14 +66,6 @@ export default function StatsSection({ stats }: Props) {
       icon: <HiServer className="text-3xl" />,
       color: "indigo",
     },
-    {
-      title: "System Status",
-      value: "Safe",
-      change: stats.systemUptime,
-      trend: "up",
-      icon: <HiCheckCircle className="text-4xl text-emerald-600" />,
-      color: "emerald",
-    },
      {
       title: "Active Bookings",
       value: stats.activeBookings,
@@ -83,6 +75,15 @@ export default function StatsSection({ stats }: Props) {
       color: "emerald",
       sparkline: true,
     },
+    {
+      title: "System Status",
+      value: "Safe",
+      change: stats.systemUptime,
+      trend: "up",
+      icon: <HiCheckCircle className="text-4xl text-emerald-600" />,
+      color: "emerald",
+    },
+    
   ];
 
   return (

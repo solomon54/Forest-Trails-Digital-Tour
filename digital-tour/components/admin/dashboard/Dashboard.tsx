@@ -24,7 +24,7 @@ export default function Dashboard() {
     revalidateOnReconnect: true,
   });
 
-  // Loading states
+  // Loading state
   if (authLoading || isLoading) {
     return <DashboardSkeleton />;
   }
@@ -32,9 +32,9 @@ export default function Dashboard() {
   // Error state
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <DashboardHeader userName={user?.name} />
-        <div className="mt-12 p-8 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-center">
+        <div className="mt-12 p-6 sm:p-8 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-center">
           <p className="font-semibold">Failed to load dashboard data</p>
           <p className="text-sm mt-2">Please try again later or contact support.</p>
           <button
@@ -52,13 +52,15 @@ export default function Dashboard() {
   const { stats, recentActivity } = data;
 
   return (
-    <div className="max-w-7xl mx-auto pb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
       <DashboardHeader userName={user?.name} />
 
+      {/* Stats Section */}
       <StatsSection stats={stats} />
 
-      <div className="mt-12 grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <ActivityFeed activities={recentActivity} className="xl:col-span-2" />
+      {/* Activity Feed + Quick Actions */}
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <ActivityFeed activities={recentActivity} className="lg:col-span-2" />
         <QuickActionsPanel />
       </div>
     </div>

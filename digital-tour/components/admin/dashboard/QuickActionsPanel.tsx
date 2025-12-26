@@ -11,17 +11,29 @@ export default function QuickActionsPanel() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-      <div className="grid grid-cols-1 gap-4">
-        {actions.map((action) => (
-          <Link key={action.href} href={action.href}>
-            <button className={`w-full py-5 bg-gradient-to-r ${action.gradient} text-white rounded-xl hover:shadow-xl transition-all duration-200 font-semibold text-lg transform hover:scale-105`}>
-              {action.label}
-            </button>
-          </Link>
-        ))}
-      </div>
-    </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
+    Quick Actions
+  </h2>
+  <div className="grid grid-cols-1 gap-3 sm:gap-4">
+    {actions.map((action) => (
+      <Link key={action.href} href={action.href}>
+        <button
+          className={`
+            w-full py-4 sm:py-5
+            bg-linear-to-r ${action.gradient}
+            text-white rounded-xl
+            text-base sm:text-lg
+            font-semibold
+            transition-all duration-200 transform hover:scale-105
+          `}
+        >
+          {action.label}
+        </button>
+      </Link>
+    ))}
+  </div>
+</div>
+
   );
 }

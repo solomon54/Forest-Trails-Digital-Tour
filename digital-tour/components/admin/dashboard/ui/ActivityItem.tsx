@@ -10,19 +10,22 @@ interface Props {
   time: string;
 }
 
-export default function ActivityItem({user, userInitial, action, target, time }: Props) {
+export default function ActivityItem({ user, userInitial, action, target, time }: Props) {
   return (
-    <div className="flex items-center gap-4 py-5 border-b border-gray-100 last:border-0">
-      <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 text-white font-bold flex items-center justify-center text-sm shrink-0">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 sm:py-5 border-b border-gray-100 last:border-0">
+      {/* Avatar */}
+      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold flex items-center justify-center text-sm sm:text-base shrink-0">
         {userInitial}
       </div>
-      <div className="flex-1">
-        <p className="text-sm text-gray-900">
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm sm:text-base text-gray-900 break-words">
           <span className="font-semibold">{user}</span> {action}{" "}
           <span className="font-semibold">{target}</span>
         </p>
-        <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-          <HiClock className="text-sm" /> {time}
+        <p className="text-xs sm:text-sm text-gray-500 mt-1 flex items-center gap-1 whitespace-nowrap">
+          <HiClock className="text-sm sm:text-base" /> {time}
         </p>
       </div>
     </div>

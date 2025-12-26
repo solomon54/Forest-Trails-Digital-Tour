@@ -16,11 +16,11 @@ export default function DashboardHeader({ userName }: Props) {
   const firstName = userName?.split(" ")[0] || "Admin";
 
   return (
-    <header className="mb-10">
-      <h1 className="text-4xl font-bold text-gray-900">
+    <header className="mb-8 sm:mb-10">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
         Welcome back, {firstName} 👋
       </h1>
-      <p className="text-lg text-gray-600 mt-4">{today}</p>
+      <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-4">{today}</p>
     </header>
   );
 }
