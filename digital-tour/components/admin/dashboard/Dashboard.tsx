@@ -52,17 +52,16 @@ export default function Dashboard() {
   const { stats, recentActivity } = data;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-      <DashboardHeader userName={user?.name} />
+  <div className="mx-auto max-w-7xl px-0 lg:px-8 pb-12">
+    <DashboardHeader userName={user?.name} />
 
-      {/* Stats Section */}
-      <StatsSection stats={stats} />
+    <StatsSection stats={stats} />
 
-      {/* Activity Feed + Quick Actions */}
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <ActivityFeed activities={recentActivity} className="lg:col-span-2" />
-        <QuickActionsPanel />
-      </div>
+    <div className="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <ActivityFeed activities={recentActivity} className="lg:col-span-2" />
+      <QuickActionsPanel />
     </div>
-  );
+  </div>
+);
+
 }

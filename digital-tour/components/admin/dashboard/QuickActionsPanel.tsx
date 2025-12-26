@@ -1,5 +1,4 @@
 // components/admin/dashboard/QuickActionsPanel.tsx
-import React from "react";
 import Link from "next/link";
 
 export default function QuickActionsPanel() {
@@ -11,29 +10,34 @@ export default function QuickActionsPanel() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
-  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
-    Quick Actions
-  </h2>
-  <div className="grid grid-cols-1 gap-3 sm:gap-4">
-    {actions.map((action) => (
-      <Link key={action.href} href={action.href}>
-        <button
-          className={`
-            w-full py-4 sm:py-5
-            bg-linear-to-r ${action.gradient}
-            text-white rounded-xl
-            text-base sm:text-lg
-            font-semibold
-            transition-all duration-200 transform hover:scale-105
-          `}
-        >
-          {action.label}
-        </button>
-      </Link>
-    ))}
-  </div>
-</div>
+    <section className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-8">
+      <h2 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-6">
+        Quick Actions
+      </h2>
 
+      <div className="grid grid-cols-1 gap-2 sm:gap-4">
+        {actions.map((action) => (
+          <Link key={action.href} href={action.href} className="block">
+            <button
+              className={`
+                w-full min-h-[44px]
+                px-4 py-3 sm:py-5
+                bg-linear-to-r ${action.gradient}
+                text-white
+                rounded-lg sm:rounded-xl
+                text-sm sm:text-lg
+                font-medium sm:font-semibold
+                transition-all
+                active:scale-95
+                sm:hover:scale-105
+                sm:hover:shadow-lg
+              `}
+            >
+              {action.label}
+            </button>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
