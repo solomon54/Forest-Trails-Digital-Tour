@@ -25,18 +25,16 @@ export default function BookingCard({ booking, onUpdate }: Props) {
 
   if (!booking) return null;
 
+  const statusStyle = STATUS_STYLES[booking.status] || STATUS_STYLES.pending;
+
   const performAction = async (action: ActionType) => {
     setActionLoading(action);
     setError("");
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/bookings/${booking.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
 
@@ -51,115 +49,111 @@ export default function BookingCard({ booking, onUpdate }: Props) {
     }
   };
 
-  const handleApprove = () => performAction("confirm");
-  const handleRejectConfirm = () => {
-    setShowRejectConfirm(false);
-    performAction("reject");
-  };
-
-  const statusStyle = STATUS_STYLES[booking.status] || STATUS_STYLES.pending;
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 overflow-hidden">
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-          <div className="space-y-1">
-            <p className="text-xs text-gray-400 font-mono uppercase">Booking ID: #{booking.id}</p>
-            <h3 className="text-xl font-bold text-gray-900">{booking.listing?.name || "Unknown Tour"}</h3>
-            <p className="text-sm text-gray-600">{booking.listing?.location || "Location not specified"}</p>
+    <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        {/* ================= Header ================= */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
+          <div className="space-y-0.5">
+            <p className="text-[10px] sm:text-xs text-gray-400 font-mono uppercase">
+              Booking #{booking.id}
+            </p>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">
+              {booking.listing?.name || "Unknown Tour"}
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-600">
+              {booking.listing?.location || "Location not specified"}
+            </p>
           </div>
 
           <span
-            className={`px-4 py-2 w-fit rounded-full text-xs font-bold uppercase text-center ${statusStyle.bg} ${statusStyle.text}`}
+            className={`self-start px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase ${statusStyle.bg} ${statusStyle.text}`}
           >
             {booking.status}
           </span>
         </div>
 
-        {/* Dates & Payment */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        {/* ================= Dates & Payment ================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
           <div>
-            <p className="font-semibold text-gray-700">Travel Dates</p>
-            <p className="text-gray-600 text-sm">
+            <p className="font-medium text-gray-700">Travel Dates</p>
+            <p className="text-gray-600">
               {new Date(booking.start_date).toLocaleDateString()} →{" "}
               {new Date(booking.end_date).toLocaleDateString()}
             </p>
           </div>
           <div>
-            <p className="font-semibold text-gray-700">Payment</p>
+            <p className="font-medium text-gray-700">Payment</p>
             <p className="text-gray-600 capitalize">
               {booking.payment_method} • {booking.payment_status}
             </p>
           </div>
         </div>
 
-        {/* Guest Info */}
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <p className="font-semibold text-gray-800">Guest Details</p>
-          <p className="text-gray-600">
+        {/* ================= Guest ================= */}
+        <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-1.5 text-xs sm:text-sm">
+          <p className="font-semibold text-gray-800">Guest</p>
+          <p className="text-gray-700">
             {booking.contact?.first_name} {booking.contact?.last_name}
           </p>
-          <p className="text-sm text-gray-600">{booking.contact?.email}</p>
-          <p className="text-sm text-gray-600">{booking.contact?.phone_number}</p>
+          <p className="text-gray-600 break-all">{booking.contact?.email}</p>
+          <p className="text-gray-600">{booking.contact?.phone_number}</p>
         </div>
 
-        {/* Error Message */}
+        {/* ================= Error ================= */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800 flex items-center gap-2">
-            <HiExclamationCircle className="text-lg shrink-0" />
-            {error}
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800">
+            <HiExclamationCircle className="text-base shrink-0 mt-0.5" />
+            <span>{error}</span>
           </div>
         )}
 
-        {/* Actions - Only for pending */}
+        {/* ================= Actions ================= */}
         {booking.status === "pending" && (
-          <div className="space-y-4 pt-4 border-t border-gray-200">
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* Approve Button - Emerald stays strong */}
+          <div className="pt-3 border-t border-gray-200 space-y-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
-                onClick={handleApprove}
+                onClick={() => performAction("confirm")}
                 disabled={!!actionLoading}
-                className="flex-1 px-3 py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition shadow-sm"
+                className="w-full sm:flex-1 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60 transition"
               >
-                {actionLoading === "confirm" ? "Processing..." : "Approve Booking"}
+                {actionLoading === "confirm" ? "Processing…" : "Approve"}
               </button>
 
-              {/* Reject Button */}
               <button
                 onClick={() => setShowRejectConfirm(true)}
                 disabled={!!actionLoading}
-                className="flex-1 px-3 py-2.5 border bg-red-600/20 border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-50 disabled:opacity-60 transition"
+                className="w-full sm:flex-1 py-2 text-sm font-medium border border-red-500/40 text-red-600 rounded-lg hover:bg-red-50 transition"
               >
-                Reject Booking
+                Reject
               </button>
             </div>
 
-            {/* Reject Confirmation */}
             {showRejectConfirm && (
-              <div className="bg-red-50 border border-red-300 rounded-xl p-1.5 space-y-2 ">
-                <div className="flex items-start gap-3 ">
-                  <HiExclamationCircle className="text-2xl text-red-600 shrink-0 mt-0.5" />
+              <div className="bg-red-50 border border-red-300 rounded-lg p-3 space-y-2">
+                <div className="flex gap-2">
+                  <HiExclamationCircle className="text-lg text-red-600 shrink-0" />
                   <div>
-                    <p className="font-semibold text-red-900 text-sm">Confirm Rejection</p>
-                    <p className="text-xs text-red-800 mt-1">
-                      This action cannot be undone. The user will be notified.
+                    <p className="font-semibold text-red-900 text-xs">
+                      Confirm rejection
+                    </p>
+                    <p className="text-[11px] text-red-800">
+                      This action cannot be undone.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 sm:gap-1">
+                <div className="flex gap-2">
                   <button
-                    onClick={handleRejectConfirm}
+                    onClick={() => performAction("reject")}
                     disabled={actionLoading === "reject"}
-                    className="px-2 py-1 text-sm bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-60 transition shadow-sm"
+                    className="px-3 py-1.5 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition"
                   >
-                    {actionLoading === "reject" ? "Processing..." : "Yes, Reject"}
+                    {actionLoading === "reject" ? "…" : "Yes"}
                   </button>
                   <button
                     onClick={() => setShowRejectConfirm(false)}
-                    disabled={!!actionLoading}
-                    className="px-2 py-1 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition"
+                    className="px-3 py-1.5 text-xs bg-gray-200 rounded-md hover:bg-gray-300 transition"
                   >
                     Cancel
                   </button>
