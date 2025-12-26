@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import AdminLayout from "@/components/layout/AdminLayout";
 
 // Lazy load dashboard
-const Dashboard = dynamic(() => import("@/components/admin/Dashboard"), {
+const Dashboard = dynamic(() => import("@/components/admin/dashboard/Dashboard"), {
   suspense: true,
 });
 

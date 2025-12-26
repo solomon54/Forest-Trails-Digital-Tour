@@ -10,7 +10,7 @@ const Footer = () => {
         
         {/* About / Logo */}
         <div>
-          <h2 className="text-2xl font-semibold mb-4">Travelly</h2>
+          <h2 className="text-2xl font-semibold mb-4">ForestTrail</h2>
           <p className="text-slate-300">
             Discover unforgettable adventures with premium, guided tours tailored for explorers like you.
           </p>

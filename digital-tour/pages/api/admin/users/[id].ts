@@ -2,6 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import User from "@/models/User";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
+import { sequelize } from "@/lib/db"; // Make sure you have this import
+import { QueryTypes } from "sequelize";
 
 export default async function handler(
   req: NextApiRequest,
@@ -35,16 +37,27 @@ export default async function handler(
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
-  // === Fetch target user ===
+  // === Fetch target user (with full data for before_state) ===
   const user = await User.findByPk(userId, {
     attributes: [
       "id",
+      "name",
+      "email",
       "role",
       "is_super_admin",
+      "photo_url",
+      "created_at",
+      "updated_at",
     ],
   });
 
   if (!user) return res.status(404).json({ message: "User not found" });
+
+  // Capture BEFORE state
+  const beforeState = {
+    role: user.role,
+    is_super_admin: user.is_super_admin,
+  };
 
   // === Parse body ===
   const { role: newRole, reason } = req.body as { role?: string; reason?: string };
@@ -62,7 +75,7 @@ export default async function handler(
     return res.status(403).json({ message: "Cannot revoke privileges from a super administrator" });
   }
 
-  // === Grant admin ===
+  // === Apply changes ===
   if (newRole === "admin") {
     if (user.role === "admin") {
       return res.status(400).json({ message: "User is already an administrator" });
@@ -70,7 +83,6 @@ export default async function handler(
     user.role = "admin";
   }
 
-  // === Revoke admin ===
   if (newRole === "user") {
     if (user.role !== "admin") {
       return res.status(400).json({ message: "User is not an administrator" });
@@ -83,21 +95,38 @@ export default async function handler(
     user.role = "user";
   }
 
-  // === Save and return the FULL updated user ===
+  // === Save user ===
   await user.save();
 
-  const updatedUser = await User.findByPk(userId, {
-    attributes: [
-      "id",
-      "name",
-      "email",
-      "role",
-      "is_super_admin",
-      "photo_url",
-      "created_at",
-      "updated_at",
-    ],
-  });
+  // Capture AFTER state
+  const afterState = {
+    role: user.role,
+    is_super_admin: user.is_super_admin,
+  };
 
-  return res.status(200).json(updatedUser);
+  // === Log to admin_audits ===
+  try {
+    await sequelize.query(
+      `INSERT INTO admin_audits 
+       (admin_id, action, target_type, target_id, before_state, after_state, reason, created_at)
+       VALUES (?, ?, 'user', ?, ?, ?, ?, NOW())`,
+      {
+        replacements: [
+          currentUser.id,                          // admin_id
+          newRole === "admin" ? "grant_admin" : "revoke_admin", // action
+          userId,                                   // target_id
+          JSON.stringify(beforeState),              // before_state
+          JSON.stringify(afterState),               // after_state
+          newRole === "user" ? reason.trim() : null // reason (only for revoke)
+        ],
+        type: QueryTypes.INSERT,
+      }
+    );
+  } catch (auditError) {
+    console.error("Failed to log admin audit:", auditError);
+    // Don't fail the whole request — auditing is important but not critical
+  }
+
+  // === Return full updated user ===
+  return res.status(200).json(user);
 }

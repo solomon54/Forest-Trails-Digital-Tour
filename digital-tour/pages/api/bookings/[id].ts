@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Booking, User, Listing, Notification } from "@/models";
 import { sequelize } from "@/lib/db";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
+import { QueryTypes } from "sequelize"; // ← Add this
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -50,21 +51,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (!booking) throw new Error("NOT_FOUND");
 
-        // 🛠️ FIX 1: Explicitly fetch user_id and status from the instance
-        const currentStatus = booking.get('status');
-        const targetUserId = booking.get('user_id');
+        const currentStatus = booking.get('status') as string;
+        const targetUserId = booking.get('user_id') as number;
 
         if (!targetUserId) {
           throw new Error("DATA_ERROR: Booking is missing user_id");
         }
 
-        // 🛠️ FIX 2: State Guards
+        // State Guards
         if ((action === "confirm" || action === "reject") && currentStatus !== "pending") {
           throw new Error(`GUARD: Booking is already ${currentStatus}`);
         }
         if (action === "cancel" && currentStatus !== "confirmed") {
           throw new Error("GUARD: Only confirmed bookings can be cancelled");
         }
+
+        // Capture BEFORE state
+        const beforeState = {
+          status: currentStatus,
+          payment_status: booking.get('payment_status'),
+          decided_by: booking.get('decided_by'),
+        };
 
         const updateData: any = {
           status: action === "confirm" ? "confirmed" : action === "reject" ? "rejected" : "cancelled",
@@ -83,7 +90,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await booking.update(updateData, { transaction: t });
 
-        // 🛠️ FIX 3: Notification now has a guaranteed user_id
+        // Capture AFTER state
+        const afterState = {
+          status: updateData.status,
+          payment_status: updateData.payment_status || booking.get('payment_status'),
+          decided_by: updateData.decided_by || booking.get('decided_by'),
+        };
+
+        // === AUDIT LOGGING ===
+        const auditActionMap: Record<string, string> = {
+          confirm: "confirm_booking",
+          reject: "reject_booking",
+          cancel: "cancel_booking",
+        };
+
+        try {
+          await sequelize.query(
+            `INSERT INTO admin_audits 
+             (admin_id, action, target_type, target_id, before_state, after_state, reason, created_at)
+             VALUES (?, ?, 'booking', ?, ?, ?, NULL, NOW())`,
+            {
+              replacements: [
+                admin.id,
+                auditActionMap[action],
+                id,
+                JSON.stringify(beforeState),
+                JSON.stringify(afterState),
+              ],
+              type: QueryTypes.INSERT,
+            }
+          );
+        } catch (auditErr) {
+          console.error("Failed to log booking audit:", auditErr);
+          // Don't break the main flow
+        }
+
+        // Notification
         await Notification.create({
           user_id: targetUserId,
           type: action === "confirm" ? "success" : action === "reject" ? "warning" : "info",
@@ -92,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           is_read: false,
         }, { transaction: t });
 
-        return booking;
+        return booking.reload(); // Return fresh data
       });
 
       return res.status(200).json(result);
@@ -103,7 +145,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error: any) {
     console.error("Server Error:", error);
     
-    // Explicit error responses
     if (error.message === "NOT_FOUND") {
       return res.status(404).json({ message: "Booking not found" });
     }
