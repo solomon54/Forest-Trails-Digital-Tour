@@ -25,41 +25,38 @@ export default function AdminSidebar() {
   const [expanded, setExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile vs desktop
+  // Detect screen size
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (mobile) {
-        setExpanded(false); // Collapsed on mobile by default
-      } else {
-        setExpanded(true); // Expanded on desktop by default
-      }
+      setExpanded(!mobile);
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Correct active link detection
   const isActive = (path: string) => {
     if (path === "/admin") return pathname === "/admin";
-    return pathname.startsWith(path);
+    return pathname === path || pathname.startsWith(path + "/");
   };
 
   return (
     <aside
       className={`
-        h-auto flex flex-col
+        flex flex-col
         bg-white shadow-xl
         transition-all duration-300 ease-in-out
-        z-30 left-0  
-        ${isMobile ? "fixed" : "sticky"} 
+        z-30 left-0
+        ${isMobile ? "fixed top-16" : "sticky top-0"}
         ${expanded ? "w-64" : "w-16"}
+        h-auto
       `}
     >
       {/* Header */}
-      <div className="h-16 bg-linear-to-r from-indigo-600 to-violet-600 flex items-center justify-between px-4 shadow-md shrink-0">
+      <div className="h-16 flex items-center justify-between px-4 bg-linear-to-r from-indigo-600 to-violet-600 shadow-md shrink-0">
         <h2
           className={`text-xl font-bold text-white overflow-hidden transition-all duration-300 ${
             expanded ? "w-40 opacity-100" : "w-0 opacity-0"
@@ -94,9 +91,7 @@ export default function AdminSidebar() {
                         : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     }
                   `}
-                  onClick={() => {
-                    if (isMobile) setExpanded(false);
-                  }}
+                  onClick={() => isMobile && setExpanded(false)}
                 >
                   <Icon className="text-xl shrink-0" />
                   <span
