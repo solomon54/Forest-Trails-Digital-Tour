@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const SignupForm: React.FC = () => {
   const [name, setName] = useState("");
@@ -13,6 +14,8 @@ const SignupForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<"weak" | "medium" | "strong">("weak");
+  const router = useRouter();
+  const redirectTo = (router.query.redirect as string) || "/";
 
   const updatePasswordStrength = (pwd: string) => {
     let score = 0;
@@ -57,7 +60,7 @@ const SignupForm: React.FC = () => {
       }
 
       alert("Account created successfully! Redirecting to login…");
-      window.location.href = "/Login";
+      router.push(`/Login?redirect=${encodeURIComponent(redirectTo)}`);
     } catch (err) {
       setError("Network error—please try again.");
     } finally {
@@ -173,9 +176,14 @@ const SignupForm: React.FC = () => {
       />
 
       <div className="text-center">
-        <Link href="/Login" className="text-sm text-emerald-600 hover:text-emerald-500">
-          Already have an account? Log in
+        <p className="text-sm text-gray-600"> Already have an account? 
+          <span className=" text-emerald-600 hover:text-emerald-500">
+        <Link 
+          href={`/Login?redirect=${encodeURIComponent(redirectTo)}`}>
+          &nbsp;Log in
         </Link>
+            </span>
+          </p>
       </div>
     </form>
   );

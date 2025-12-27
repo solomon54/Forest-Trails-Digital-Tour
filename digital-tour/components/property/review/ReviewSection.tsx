@@ -41,10 +41,7 @@ export default function ReviewSection({ listingId }: ReviewSectionProps) {
         const res = await fetch(
           `/api/reviews?listingId=${listingId}&page=${pageNumber}&limit=5`
         );
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch reviews");
-        }
+        if (!res.ok) throw new Error("Failed to fetch reviews");
 
         const data = await res.json();
         setReviews(data.data ?? []);
@@ -65,40 +62,42 @@ export default function ReviewSection({ listingId }: ReviewSectionProps) {
   }, [fetchReviews, page]);
 
   return (
-  <section className="mt-12">
-    <div className="max-w-4xl mx-auto px-4">
-      <h2 className="text-2xl font-semibold mb-4">
-        Guest Reviews
-      </h2>
+    <section className="mt-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-0">
+        <h2 className="text-xl text-gray-700 sm:text-2xl font-semibold mb-4">
+          Guest Reviews
+        </h2>
 
-      {/* Review Form */}
-      <div className="mb-6">
-        <ReviewForm
-          listingId={listingId}
-          onSuccess={() => fetchReviews(page)}
-        />
-      </div>
-
-      {loading ? (
-        <ReviewSkeleton count={5} />
-      ) : reviews.length === 0 ? (
-        <p className="italic text-gray-500">
-          No reviews yet. Be the first!
-        </p>
-      ) : (
-        <ReviewList reviews={reviews} />
-      )}
-
-      {meta && meta.totalPages > 1 && (
-        <div className="mt-6">
-          <ReviewPagination
-            currentPage={meta.page}
-            totalPages={meta.totalPages}
-            onPageChange={setPage}
+        {/* Review Form */}
+        <div className="mb-6">
+          <ReviewForm
+            listingId={listingId}
+            onSuccess={() => fetchReviews(page)}
           />
         </div>
-      )}
-    </div>
-  </section>
-);
+
+        {/* Reviews List */}
+        {loading ? (
+          <ReviewSkeleton count={5} />
+        ) : reviews.length === 0 ? (
+          <p className="italic text-gray-500 text-sm sm:text-base">
+            No reviews yet. Be the first!
+          </p>
+        ) : (
+          <ReviewList reviews={reviews} />
+        )}
+
+        {/* Pagination */}
+        {meta && meta.totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <ReviewPagination
+              currentPage={meta.page}
+              totalPages={meta.totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }

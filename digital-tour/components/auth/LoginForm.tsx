@@ -97,11 +97,12 @@ const LoginForm: React.FC = () => {
         />
 
         <p className="text-sm text-center mt-2">
-          <Link href="/Signup" className="text-emerald-600">
-            {" "}
-          Don`t have an account?
-            Sign up
-          </Link>
+          <Link 
+          href={`/Signup?redirect=${encodeURIComponent(redirectTo)}`} 
+          className="text-emerald-600"
+        >
+          Don&apos;t have an account? Sign up
+        </Link>
         </p>
       </form>
     </div>

@@ -17,7 +17,6 @@ export default function ReviewForm({ listingId, onSuccess }: ReviewFormProps) {
   const submitReview = useCallback(async () => {
     const trimmedComment = comment.trim();
 
-    // Basic validation
     if (!rating) {
       setError("Please select a star rating.");
       return;
@@ -41,13 +40,11 @@ export default function ReviewForm({ listingId, onSuccess }: ReviewFormProps) {
       if (res.status === 401) {
         setError("You must be logged in to submit a review.");
       } else if (res.status === 409) {
-        // Already submitted
         setReviewSubmitted(true);
       } else if (!res.ok) {
         const data = await res.json();
         setError(data.message || "Failed to submit review.");
       } else {
-        // Success
         setRating(0);
         setComment("");
         setReviewSubmitted(true);
@@ -63,8 +60,8 @@ export default function ReviewForm({ listingId, onSuccess }: ReviewFormProps) {
 
   if (reviewSubmitted) {
     return (
-      <div className="mb-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm text-gray-700">
-        <p className="text-lg font-medium">
+      <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm text-gray-700">
+        <p className="text-sm sm:text-base font-medium text-center">
           You’ve already submitted a review for this listing. Thank you!
         </p>
       </div>
@@ -72,29 +69,41 @@ export default function ReviewForm({ listingId, onSuccess }: ReviewFormProps) {
   }
 
   return (
-    <div className="mb-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm" aria-busy={loading}>
-      <h3 className="mb-4 text-lg font-semibold text-gray-900">Leave a Review</h3>
+    <div
+      className="mb-8 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm"
+      aria-busy={loading}
+    >
+      <h3 className="mb-3 sm:mb-4 text-lg sm:text-xl font-semibold text-gray-900">
+        Leave a Review
+      </h3>
 
-      <div className="mb-4">
+      {/* Star Rating */}
+      <div className="mb-3 sm:mb-4">
         <StarRatingInput value={rating} onChange={setRating} />
       </div>
 
-      <div className="relative">
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Tell others what you liked (or didn’t)..."
-          rows={4}
-          className={`w-full resize-none rounded-xl bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-700/30 transition ${error && !comment.trim() ? "ring-2 ring-red-400" : ""}`}
-        />
-      </div>
+      {/* Comment Box */}
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Tell others what you liked (or didn’t)..."
+        rows={4}
+        className={`w-full resize-none rounded-xl bg-gray-50 px-3 sm:px-4 py-2.5 sm:py-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-700/30 transition ${
+          error && !comment.trim() ? "ring-2 ring-red-400" : ""
+        }`}
+      />
 
-      {error && <p className="mt-3 text-sm font-medium text-red-500">{error}</p>}
+      {error && (
+        <p className="mt-2 sm:mt-3 text-sm sm:text-base font-medium text-red-500">
+          {error}
+        </p>
+      )}
 
+      {/* Submit Button */}
       <button
         onClick={submitReview}
         disabled={loading}
-        className="mt-5 inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition"
+        className="mt-4 sm:mt-5 w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 sm:px-6 py-2.5 text-sm sm:text-base font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition"
       >
         {loading ? "Submitting…" : "Submit Review"}
       </button>

@@ -1,18 +1,20 @@
-
 // pages/tours/[id].tsx
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import PropertyDetail from "@/components/property/PropertyDetail";
-import CardSkeleton from "@/components/skelotons/CardSkeleton";
-import Footer from "@/components/layout/Footer";
+import { useEffect, useState, useRef } from "react";
 
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/layout/Footer";
+import CardSkeleton from "@/components/skelotons/CardSkeleton";
+
+import PropertyDetail from "@/components/property/PropertyDetail";
 import BookingForm from "@/components/property/booking/BookingForm";
+
 import { getListingById } from "@/services/listingService";
 import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/components/navbar/Navbar";
 
-
-// --- Interface ---
+/* =======================
+   Types
+======================= */
 interface ListingDetail {
   id: number;
   name: string;
@@ -21,26 +23,34 @@ interface ListingDetail {
   image: string;
   description: string;
   media: { id: number; url: string; type: string }[];
-  reviews: { id: number; rating: number; comment: string; user: { name: string } }[];
+  reviews: {
+    id: number;
+    rating: number;
+    comment: string;
+    user: { name: string };
+  }[];
 }
 
 export default function TourPage() {
   const router = useRouter();
   const { id } = router.query;
-
   const { user, loading: authLoading } = useAuth();
+
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
 
-  // --- Fetch listing ---
+  // Ref for the Sign In button (non-logged-in user)
+  const signInRef = useRef<HTMLDivElement>(null);
+
+  /* =======================
+     Fetch Listing (PUBLIC)
+======================= */
   useEffect(() => {
     if (!id) return;
 
-    setListing(null);
-    setError(null);
     setLoading(true);
+    setError(null);
 
     getListingById(id as string)
       .then((data) => {
@@ -55,49 +65,74 @@ export default function TourPage() {
           reviews: data.reviews || [],
         });
       })
-      .catch((err) => {
-        console.error("Failed to load listing", err);
-        setError("Failed to load trail—retry sync.");
-      })
+      .catch(() => setError("Failed to load tour details."))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading || authLoading) return <CardSkeleton />;
+  /* =======================
+     Page States
+======================= */
+  if (loading) return <><Navbar /><CardSkeleton /><Footer /></>;
+  if (error || !listing) return <><Navbar /><p className="text-red-600 text-center p-8">{error}</p><Footer /></>;
 
-  if (error || !listing) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-red-500">{error || "Trail not found"}</p>
-      </div>
-    );
-  }
+  /* =======================
+     Smooth Scroll Handler
+======================= */
+  const handleCheckAvailability = () => {
+    if (user) {
+      const bookingEl = document.getElementById("bookingForm");
+      bookingEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      signInRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
-  if (!user) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-red-500">You must be logged in to book this tour.</p>
-      </div>
-    );
-  }
-
-
-
+  /* =======================
+     Render
+======================= */
   return (
-    <div className="bg-neutral-50 text-slate-900 font-inter">
+    <main className="bg-neutral-50 min-h-screen">
+      <Navbar />
 
-    <Navbar/>
+      {/* Public Content */}
+      <PropertyDetail
+        property={listing} />
 
-      <PropertyDetail property={listing} />
+      {/* Booking Section */}
+      <section aria-labelledby="booking-heading" className="max-w-7xl mx-auto">
+        <h2 id="booking-heading" className="sr-only">Booking</h2>
 
-      {/* --- Booking Form */}
-      <div id="bookingForm" className="mt-6">
-        <BookingForm
-          listingId={listing.id}
-          userId={user.id}
-          />
-      </div>
+        {authLoading && <CardSkeleton />}
+
+        {!authLoading && !user && (
+          <div ref={signInRef} className="text-center" id="bookingForm"> 
+            <button
+              onClick={() =>
+                router.push(`/Login?redirect=${encodeURIComponent(router.asPath)}`)
+              }
+              className="
+                px-6 py-3 sm:px-8 sm:py-4
+                bg-emerald-600
+                text-white
+                rounded-lg
+                transition-transform duration-200
+                hover:scale-105
+                focus:outline-none focus:ring-2 focus:ring-emerald-400
+              "
+            >
+              Sign in to book &rarr;
+            </button>
+          </div>
+        )}
+
+        {!authLoading && user && (
+          <div id="bookingForm">
+            <BookingForm listingId={listing.id} userId={user.id} />
+          </div>
+        )}
+      </section>
 
       <Footer />
-    </div>
+    </main>
   );
 }

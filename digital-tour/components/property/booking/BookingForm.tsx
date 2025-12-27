@@ -6,7 +6,7 @@ import ContactInfo from "./ContactInfo";
 import PaymentMethod from "./PaymentMethod";
 import BillingAddress from "./BillingAddress";
 import SubmitButton from "./SubmitButton";
-import CancellationPolicy from "../CancellationPolicy";
+import CancellationPolicy from "../TourInfo";
 import PriceSummary from "./PriceSummary";
 
 interface BookingFormProps {
@@ -190,7 +190,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ listingId, userId }) => {
     <>
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+      <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100">
         <form onSubmit={handleSubmit} className="md:w-3/4 mx-auto space-y-12" noValidate>
           
           <DateAvailability
@@ -204,7 +204,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ listingId, userId }) => {
             availabilityError={availabilityError}
           />
 
-          <div className="space-y-10">
+          <div className="space-y-10 text-gray-700">
             <ContactInfo 
               values={formData} 
               errors={errors} 

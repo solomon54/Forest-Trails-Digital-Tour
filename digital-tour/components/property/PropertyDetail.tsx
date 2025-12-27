@@ -6,16 +6,15 @@ import ReviewSection from "./review/ReviewSection";
 
 interface PropertyDetailProps {
   property: ListingDetail;
+  onCheckAvailability?: () => void;
 }
 
-export default function PropertyDetail({ property }: PropertyDetailProps) {
+export default function PropertyDetail({ property, onCheckAvailability }: PropertyDetailProps) {
   const reviewCount = property.reviews?.length ?? 0;
 
   const averageRating = useMemo(() => {
     if (!reviewCount) return 0;
-    return (
-      property.reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount
-    );
+    return property.reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount;
   }, [property.reviews, reviewCount]);
 
   const descriptionParagraphs = useMemo(() => {
@@ -26,10 +25,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   }, [property.description]);
 
   const scrollToBooking = () => {
+    if (onCheckAvailability) return onCheckAvailability();
     const el = document.getElementById("bookingForm");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const renderStars = (rating: number) => {
@@ -38,46 +36,42 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     const hasHalf = rating - fullStars >= 0.5;
 
     for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(<FaStar key={i} className="text-yellow-400" />);
-      } else if (i === fullStars + 1 && hasHalf) {
-        stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
-      } else {
-        stars.push(<FaRegStar key={i} className="text-gray-300" />);
-      }
+      if (i <= fullStars) stars.push(<FaStar key={i} className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5" />);
+      else if (i === fullStars + 1 && hasHalf) stars.push(<FaStarHalfAlt key={i} className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5" />);
+      else stars.push(<FaRegStar key={i} className="text-gray-300 w-4 h-4 sm:w-5 sm:h-5" />);
     }
 
-    return <div className="flex">{stars}</div>;
+    return <div className="flex gap-1 flex-wrap">{stars}</div>;
   };
 
   return (
-    <main className="sm:p-0 md:p-2 pb-24">
-      <div className="max-w-6xl mx-auto py-10 px-4 lg:px-0">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">
+    <main className="pb-24">
+      <div className="max-w-6xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-3">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
           {property.name}
         </h1>
 
         {/* Location / Price / Rating / CTA */}
-        <div className="flex flex-col sm:flex-row sm:justify-between gap-6 mb-8">
-          <div className="flex items-center gap-3 text-gray-700">
-            <MdLocationOn className="w-7 h-7 text-emerald-600" />
-            <span className="text-lg font-medium">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-6 mb-8 border-b border-gray-300">
+          <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
+            <MdLocationOn className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-600" />
+            <span className="text-base sm:text-lg font-medium">
               {property.location || "Location TBD"}
             </span>
           </div>
 
-          <div className="flex flex-col items-end gap-4 w-full sm:w-auto">
+          <div className="flex flex-col items-start sm:items-end gap-3 sm:gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-1">
-              <FaDollarSign className="w-8 h-8 text-emerald-600" />
-              <span className="text-3xl font-bold text-emerald-600">
+              <FaDollarSign className="w-5 h-5 text-emerald-600" />
+              <span className="text-2xl sm:text-3xl font-bold text-emerald-600">
                 {property.price ?? "Price TBD"}
               </span>
             </div>
 
             {reviewCount > 0 && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 {renderStars(averageRating)}
-                <span className="text-sm  text-gray-600 font-medium">
+                <span className="text-sm sm:text-base text-gray-600 font-medium">
                   {averageRating.toFixed(1)} ({reviewCount} reviews)
                 </span>
               </div>
@@ -86,7 +80,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <button
               onClick={scrollToBooking}
               aria-label="Check availability"
-              className="mt-2 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-8 py-3 rounded-xl shadow-md transition"
+              className="mt-2 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3 rounded-xl shadow-md transition mb-2"
             >
               Check Availability
             </button>
@@ -95,19 +89,17 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
 
         {/* Media Gallery */}
         {property.media?.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             {property.media.map((m, idx) => (
               <div
                 key={m.id}
-                className={`overflow-hidden rounded-xl shadow-lg ${
-                  idx === 0 ? "md:col-span-2 md:row-span-2" : ""
-                }`}
+                className={`overflow-hidden rounded-xl shadow-lg ${idx === 0 ? "md:col-span-2 md:row-span-2" : ""}`}
               >
                 {m.type === "image" ? (
                   <img
                     src={m.url}
                     alt={`${property.name} media ${idx + 1}`}
-                    className="w-full h-96 object-cover hover:scale-105 transition-transform"
+                    className="w-full h-64 sm:h-72 md:h-96 object-cover hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
                 ) : (
@@ -115,7 +107,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     src={m.url}
                     controls
                     aria-label="Property video"
-                    className="w-full h-96 object-cover"
+                    className="w-full h-64 sm:h-72 md:h-96 object-cover"
                   />
                 )}
               </div>
@@ -124,14 +116,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         )}
 
         {/* Description */}
-        <div className="mb-12 md:p-3">
-          <h2 className="text-2xl font-semibold mb-5">Description</h2>
-          <div className="text-gray-600 sm:text-base space-y-4">
-            {descriptionParagraphs?.length ? (
-              descriptionParagraphs.map((p, i) => <p key={i}>{p}</p>)
-            ) : (
-              <p className="italic">No description available.</p>
-            )}
+        <div className="mb-12">
+          <h2 className="text-xl text-gray-700 sm:text-2xl font-semibold mb-4">Description</h2>
+          <div className="text-gray-600 text-sm sm:text-base space-y-4">
+            {descriptionParagraphs?.length ? descriptionParagraphs.map((p, i) => <p key={i}>{p}</p>) : <p className="italic">No description available.</p>}
           </div>
         </div>
 

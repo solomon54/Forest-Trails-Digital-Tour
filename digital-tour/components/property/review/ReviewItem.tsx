@@ -34,19 +34,18 @@ export default function ReviewItem({ review }: ReviewItemProps) {
 
   const hasPhoto = !!review.reviewUser?.photo_url && !imageError;
 
-  // Split comment into paragraphs (support \n\n or multiple newlines)
   const paragraphs = review.comment
     ? review.comment.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
     : [];
 
   return (
     <li className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden">
-      <div className="p-6">
-        <div className="flex flex-col sm:flex-row gap-5">
+      <div className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
           {/* Avatar */}
           <div className="flex-shrink-0 self-start">
             {hasPhoto ? (
-              <div className="relative w-14 h-14 rounded-full overflow-hidden ring-4 ring-gray-100">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden ring-4 ring-gray-100">
                 <Image
                   src={review.reviewUser!.photo_url!}
                   alt={name}
@@ -58,8 +57,8 @@ export default function ReviewItem({ review }: ReviewItemProps) {
                 />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg ring-4 ring-gray-100">
-                {initials || <FaUserCircle className="w-10 h-10 text-white/90" />}
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-base sm:text-lg ring-4 ring-gray-100">
+                {initials || <FaUserCircle className="w-8 h-8 text-white/90" />}
               </div>
             )}
           </div>
@@ -67,40 +66,40 @@ export default function ReviewItem({ review }: ReviewItemProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             {/* Header: Name, Time, Rating */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-3 mb-3 sm:mb-4">
               <div>
-                <h4 className="font-semibold text-lg text-gray-900">{name}</h4>
-                <time className="text-sm text-gray-500">
+                <h4 className="font-semibold text-base sm:text-lg text-gray-900">
+                  {name}
+                </h4>
+                <time className="text-xs sm:text-sm text-gray-500">
                   {review.relativeTime || "Recently"}
                 </time>
               </div>
 
-              <StarRatingDisplay rating={review.rating} size="large" showValue />
+              <StarRatingDisplay rating={review.rating} size="medium" showValue />
             </div>
 
             {/* Review Text */}
             {paragraphs.length > 0 ? (
-              <div className="relative pl-6">
+              <div className="relative pl-5 sm:pl-6">
                 {/* Left quote */}
-                <span className="absolute left-0 top-1 text-5xl text-emerald-200 font-serif leading-none">
+                <span className="absolute left-0 top-0 text-3xl sm:text-5xl text-emerald-200 font-serif leading-none">
                   “
                 </span>
 
-                <div className="space-y-3 text-gray-700 text-base leading-relaxed italic">
+                <div className="space-y-2 sm:space-y-3 text-gray-700 text-sm sm:text-base leading-relaxed italic">
                   {paragraphs.map((paragraph, i) => (
-                    <p key={i} className="relative">
-                      {paragraph}
-                    </p>
+                    <p key={i} className="relative">{paragraph}</p>
                   ))}
                 </div>
 
                 {/* Right quote */}
-                <span className="absolute -bottom-4 right-0 text-5xl text-emerald-200 font-serif leading-none">
+                <span className="absolute -bottom-2 sm:-bottom-4 right-0 text-3xl sm:text-5xl text-emerald-200 font-serif leading-none">
                   ”
                 </span>
               </div>
             ) : (
-              <p className="text-gray-500 italic">No written review.</p>
+              <p className="text-gray-500 italic text-sm sm:text-base">No written review.</p>
             )}
           </div>
         </div>

@@ -1,153 +1,206 @@
 // pages/tours/index.tsx
-import { useEffect, useState } from "react";
-import { getAllListings } from "@/services/listingService";
-import { Listing } from "@/types/admin";
-import CardSkeleton from "@/components/skelotons/CardSkeleton";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import Navbar from "@/components/navbar/Navbar";
-import Footer from "@/components/layout/Footer";
 import { MdLocationOn } from "react-icons/md";
 
-const TourMedia = ({
-  url,
-  name,
-  location,
-}: {
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/layout/Footer";
+import CardSkeleton from "@/components/skelotons/CardSkeleton";
+
+import { getAllListings } from "@/services/listingService";
+import { Listing } from "@/types/admin";
+
+const PLACEHOLDER_IMAGE = "/images/placeholder.jpg";
+
+interface TourMediaProps {
   url: string | null;
   name: string;
   location?: string | null;
-}) => {
-  const placeholder = "/images/placeholder.jpg";
+}
 
+function TourMedia({ url, name, location }: TourMediaProps) {
   if (!url) {
     return (
-      <div className="w-full h-64 bg-gray-200 rounded-t-2xl flex items-center justify-center">
-        <span className="text-gray-400 text-lg">No image</span>
+      <div
+        className="w-full h-48 sm:h-56 lg:h-64 bg-gray-200 rounded-t-2xl flex items-center justify-center"
+        aria-label="No media available"
+      >
+        <span className="text-gray-400 text-sm">No image available</span>
       </div>
     );
   }
 
-  const isVideo = url.toLowerCase().match(/\.(mp4|webm)$/);
+  const isVideo = /\.(mp4|webm)$/i.test(url);
 
-  return isVideo ? (
-    <video
-      src={url}
-      muted
-      loop
-      playsInline
-      className="w-full h-64 object-cover rounded-t-2xl"
-      poster={placeholder}
-    >
-      <track kind="captions" />
-    </video>
-  ) : (
+  if (isVideo) {
+    return (
+      <video
+        src={url}
+        muted
+        loop
+        playsInline
+        poster={PLACEHOLDER_IMAGE}
+        className="w-full h-48 sm:h-56 lg:h-64 object-cover rounded-t-2xl"
+        aria-label={`${name} preview video`}
+      >
+        <track kind="captions" srcLang="en" />
+      </video>
+    );
+  }
+
+  return (
     <img
       src={url}
       alt={`${name} in ${location || "destination"}`}
-      className="w-full h-64 object-cover rounded-t-2xl transition-transform duration-700 group-hover:scale-110"
+      className="w-full h-48 sm:h-56 lg:h-64 object-cover rounded-t-2xl transition-transform duration-700 group-hover:scale-110"
       loading="lazy"
       onError={(e) => {
-        (e.target as HTMLImageElement).src = placeholder;
+        (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE;
       }}
     />
   );
-};
+}
 
 export default function ToursListingPage() {
   const [tours, setTours] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const data = await getAllListings({ status: "active" });
-        setTours(data);
-      } catch (err) {
-        console.error("Failed to load tours:", err);
-        setError("Unable to load tours at this time. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTours = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    fetchTours();
+      const data = await getAllListings({ status: "active" });
+      setTours(data);
+    } catch (err) {
+      console.error("Failed to load tours:", err);
+      setError("Unable to load tours at this time. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchTours();
+  }, [fetchTours]);
 
   return (
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <main
+        role="main"
+        className="min-h-screen bg-linear-to-b from-gray-50 to-white"
+      >
         {/* Hero Header */}
-        <section className="max-w-7xl mx-auto px-6 pt-16 pb-12 text-center lg:text-left">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-            Discover Your Next Adventure
-          </h1>
-          <p className="mt-4 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto lg:mx-0">
-            Hand-curated tours and unique experiences waiting just for you.
-          </p>
-          <hr />
-        </section>
+  <section
+  aria-labelledby="tours-page-heading"
+  className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 lg:pt-16 pb-6 sm:pb-10 lg:pb-12 text-center lg:text-left shadow lg:shadow lg:shadow-gray-300  mb-2">
+  <h1  id="tours-page-heading"
+    className="
+      text-2xl sm:text-3xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-snug sm:leading-tight">
+    Discover Your Next Adventure
+  </h1>
+
+  <p
+    className="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto lg:mx-0 leading-relaxed">
+    Hand-curated tours and unique experiences waiting just for you.
+  </p>
+</section>
+
 
         {/* Tours Grid */}
-        <section className="max-w-7xl mx-auto px-6 pb-24">
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...Array(6)].map((_, i) => (
+        <section
+          aria-label="Available tours"
+          className="max-w-7xl mx-auto px-4 sm:px-6 pb-24"
+        >
+          {loading && (
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              aria-busy="true"
+            >
+              {Array.from({ length: 8 }).map((_, i) => (
                 <CardSkeleton key={i} />
               ))}
             </div>
-          ) : error ? (
-            <div className="text-center py-20">
-              <p className="text-xl text-gray-700 mb-4">{error}</p>
+          )}
+
+          {!loading && error && (
+            <div className="text-center py-20" role="alert">
+              <p className="text-lg text-gray-700 mb-6">{error}</p>
               <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition"
+                type="button"
+                onClick={fetchTours}
+                className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                Try Again
+                Try again
               </button>
             </div>
-          ) : tours.length === 0 ? (
+          )}
+
+          {!loading && !error && tours.length === 0 && (
             <div className="text-center py-20">
               <div className="bg-gray-200 border-2 border-dashed rounded-2xl w-32 h-32 mx-auto mb-6" />
-              <p className="text-2xl font-medium text-gray-800">No tours available yet</p>
-              <p className="text-gray-600 mt-2">Check back soon — new adventures are coming!</p>
+              <p className="text-xl font-medium text-gray-800">
+                No tours available yet
+              </p>
+              <p className="text-gray-600 mt-2">
+                Check back soon — new adventures are coming!
+              </p>
             </div>
-          ) : (
+          )}
+
+          {!loading && !error && tours.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {tours.map((tour) => {
-                const price = tour.price > 0 ? `$${tour.price}` : "Inquire";
+                const price =
+                  tour.price && tour.price > 0
+                    ? `$${tour.price}`
+                    : "Inquire";
 
                 return (
                   <Link
                     key={tour.id}
                     href={`/tours/${tour.id}`}
-                    className="group block transform hover:-translate-y-2 transition-all duration-300"
+                    aria-label={`View details for ${tour.name}`}
+                    className="group block transition-transform hover:-translate-y-2"
                   >
-                    <article className="bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden flex flex-col h-full border border-gray-100">
-                      <TourMedia url={tour.url} name={tour.name} location={tour.location} />
+                    <article className="bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden flex flex-col h-full border border-gray-100">
+                      <TourMedia
+                        url={tour.url}
+                        name={tour.name}
+                        location={tour.location}
+                      />
 
-                      <div className="p-6 flex flex-col flex-grow">
-                        <h2 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-emerald-700 transition">
+                      <div className="p-6 flex flex-col grow">
+                        <h2 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-emerald-700 transition">
                           {tour.name}
                         </h2>
 
                         <div className="flex items-center gap-1.5 text-gray-600 mt-3">
-                          <MdLocationOn className="text-emerald-600 text-lg" />
+                          <MdLocationOn
+                            className="text-emerald-600 text-lg"
+                            aria-hidden="true"
+                          />
                           <span className="text-sm">
                             {tour.location || "Location coming soon"}
                           </span>
                         </div>
 
                         <p className="text-gray-600 mt-4 line-clamp-3 grow">
-                          {tour.description || "Explore this incredible journey..."}
+                          {tour.description ||
+                            "Explore this incredible journey..."}
                         </p>
 
                         <div className="flex items-end justify-between mt-6 pt-4 border-t border-gray-100">
                           <div>
-                            <p className="text-2xl font-bold text-emerald-600">{price}</p>
-                            <p className="text-xs text-gray-500">per person</p>
+                            <p className="text-xl font-bold text-emerald-600">
+                              {price}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              per person
+                            </p>
                           </div>
 
                           <span className="text-emerald-700 font-medium group-hover:underline">
