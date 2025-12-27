@@ -65,7 +65,12 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
     <article className="bg-white sm:bg-gray-50 rounded-xl border border-gray-200 p-4 sm:p-5 hover:shadow-md transition">
       <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
         {/* Avatar */}
-        <ActivityAvatar name={activity.admin.name} />
+        <ActivityAvatar
+  name={activity.admin.name}
+  imageUrl={activity.admin.photoUrl} // optional if you have a photo
+  isOnline={activity.admin.isOnline} // <- this is critical
+/>
+
 
         {/* Content */}
         <div className="flex-1 min-w-0">

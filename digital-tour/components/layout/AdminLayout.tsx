@@ -5,7 +5,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useState, useEffect } from "react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarWidth, setSidebarWidth] = useState(256); // match AdminSidebar default
+  const [, setSidebarWidth] = useState(256); 
 
   // Listen for window resize to update sidebar width dynamically
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Main content takes the remaining width minus sidebarWidth */}
         <div
           className="flex-1 flex flex-col overflow-hidden transition-all duration-300"
-          style={{ marginLeft: `${sidebarWidth}px` }}
+          // style={{ marginLeft: `${sidebarWidth}px` }}
         >
           <main className="flex-1 justify-center overflow-y-auto p-2 md:p-4 lg:p-10">
             {children}

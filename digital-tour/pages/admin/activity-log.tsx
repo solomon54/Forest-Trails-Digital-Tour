@@ -1,5 +1,7 @@
-import { useState } from "react";
+//pages/admin/activity-log.tsx
+import { useState, useEffect } from "react";
 import useSWR from "swr";
+import { io } from "socket.io-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import ActivitySearch from "@/components/admin/activity/ActivitySearch";
 import ActivityList from "@/components/admin/activity/ActivityList";
@@ -11,17 +13,49 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 export default function ActivityLogPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  
+  // store online status per userId
+  const [userStatus, setUserStatus] = useState<Record<number, boolean>>({});
 
   const { data, error, isLoading, mutate } = useSWR<{
     activities: Activity[];
     meta: ActivityMeta;
   }>(
-    `/api/admin/activity-log?page=${page}&limit=10&search=${encodeURIComponent(
-      search
-    )}`,
+    `/api/admin/activity-log?page=${page}&limit=10&search=${encodeURIComponent(search)}`,
     fetcher,
     { keepPreviousData: true }
   );
+
+  // Socket.io for real-time online/offline
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (!token) return;
+
+    const socket = io("http://localhost:3000", {
+      auth: { token },
+    });
+
+    socket.on("user:online", ({ userId }) => {
+      setUserStatus(prev => ({ ...prev, [userId]: true }));
+    });
+
+    socket.on("user:offline", ({ userId }) => {
+      setUserStatus(prev => ({ ...prev, [userId]: false }));
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  // Merge online status into activities for child components
+  const activitiesWithStatus = data?.activities.map(act => ({
+    ...act,
+    admin: { 
+      ...act.admin,
+      isOnline: userStatus[act.admin.id] ?? false
+    }
+  }));
 
   return (
     <AdminLayout>
@@ -66,13 +100,12 @@ export default function ActivityLogPage() {
         )}
 
         {/* Activity List */}
-        {data && !isLoading && (
+        {activitiesWithStatus && !isLoading && (
           <>
-            <ActivityList activities={data.activities} />
+            <ActivityList activities={activitiesWithStatus} />
 
             {/* Pagination */}
             {data.meta.totalPages > 1 && (
-              
               <ActivityPagination
                 page={page}
                 totalPages={data.meta.totalPages}

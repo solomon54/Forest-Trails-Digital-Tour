@@ -16,7 +16,7 @@ const menuItems = [
   { label: "Dashboard", path: "/admin", icon: HiHome },
   { label: "Users", path: "/admin/users", icon: HiUsers },
   { label: "Bookings", path: "/admin/bookings", icon: HiCalendar },
-  { label: "Notifications", path: "/admin/notifications", icon: HiBell },
+  { label: "Notifications", path: "#", icon: HiBell },
   { label: "Resources", path: "/admin/resources", icon: HiFolder },
 ];
 
@@ -25,7 +25,6 @@ export default function AdminSidebar() {
   const [expanded, setExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect screen size
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
@@ -37,7 +36,6 @@ export default function AdminSidebar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Correct active link detection
   const isActive = (path: string) => {
     if (path === "/admin") return pathname === "/admin";
     return pathname === path || pathname.startsWith(path + "/");
@@ -51,15 +49,15 @@ export default function AdminSidebar() {
         transition-all duration-300 ease-in-out
         z-30 left-0
         ${isMobile ? "fixed top-16" : "sticky top-0"}
-        ${expanded ? "w-64" : "w-16"}
+        ${expanded ? "w-56" : "w-14"}
         h-auto
       `}
     >
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 bg-linear-to-r from-indigo-600 to-violet-600 shadow-md shrink-0">
+      {/* Header (scaled down) */}
+      <div className="h-14 flex items-center justify-between px-3 bg-linear-to-r from-indigo-600 to-violet-600 shadow-md shrink-0">
         <h2
-          className={`text-xl font-bold text-white overflow-hidden transition-all duration-300 ${
-            expanded ? "w-40 opacity-100" : "w-0 opacity-0"
+          className={`text-base font-semibold text-white overflow-hidden transition-all duration-300 ${
+            expanded ? "w-36 opacity-100" : "w-0 opacity-0"
           }`}
         >
           Admin Panel
@@ -67,16 +65,16 @@ export default function AdminSidebar() {
 
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-white text-2xl hover:bg-white/20 rounded-lg p-1 transition-all shrink-0"
+          className="text-white text-xl hover:bg-white/20 rounded-md p-1 transition-all shrink-0"
           aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
         >
           {expanded ? <HiChevronLeft /> : <HiChevronRight />}
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 overflow-y-auto">
-        <ul className="space-y-2">
+      {/* Navigation (scaled spacing + text) */}
+      <nav className="flex-1 px-2 py-4 overflow-y-auto">
+        <ul className="space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -84,7 +82,8 @@ export default function AdminSidebar() {
                 <Link
                   href={item.path}
                   className={`
-                    flex items-center gap-4 px-3 py-3 rounded-lg font-medium text-sm transition-all
+                    flex items-center gap-3 px-2.5 py-2 rounded-md
+                    text-xs font-medium transition-all
                     ${
                       isActive(item.path)
                         ? "bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200"
@@ -93,10 +92,11 @@ export default function AdminSidebar() {
                   `}
                   onClick={() => isMobile && setExpanded(false)}
                 >
-                  <Icon className="text-xl shrink-0" />
+                  <Icon className="text-lg shrink-0" />
+
                   <span
                     className={`overflow-hidden transition-all duration-300 whitespace-nowrap ${
-                      expanded ? "w-32 opacity-100" : "w-0 opacity-0"
+                      expanded ? "w-28 opacity-100" : "w-0 opacity-0"
                     }`}
                   >
                     {item.label}

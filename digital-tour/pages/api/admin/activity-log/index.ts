@@ -160,8 +160,10 @@ export default async function handler(
       return {
         id: log.id,
         admin: {
+          id: log.admin_id,
           name: log.admin_name || "System",
           email: log.admin_email,
+          photoUrl: log.admin_photo_url,
         },
         action: log.action,
         target: {
