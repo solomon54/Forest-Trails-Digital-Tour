@@ -23,7 +23,7 @@ export default function Dashboard() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-slate-100">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-gray-50 to-slate-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-emerald-600 mx-auto"></div>
             <p className="mt-4 text-slate-600">Loading your dashboard...</p>
@@ -48,7 +48,7 @@ export default function Dashboard() {
             backgroundImage: "url('/images/Ethiopian-Church-Forests.webp')",
           }}
           aria-hidden>
-          <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-950/80 to-emerald-950/40" />
+          <div className="absolute inset-0 bg-linear-to-t from-emerald-950 via-emerald-950/80 to-emerald-950/40" />
         </div>
 
         <div className="relative w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-12 text-center">
