@@ -2,27 +2,27 @@
 import SignupForm from "@/components/auth/SignupForm";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/navbar/Navbar";
-import Link from "next/link";
 
 export default function SignupPage() {
   return (
     <>
       <Navbar />
 
-      <div className="min-h-screen relative flex items-center justify-center py-8 px-4 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-100 to-slate-50 overflow-hidden">
-        {/* Subtle Ethiopian Church Forest Backdrop */}
+      {/* Consistent with Upload Hero – Immersive & Elegant */}
+      <div className="min-h-screen relative flex items-center justify-center py-8 px-4 sm:py-12 lg:py-16 bg-emerald-950 overflow-hidden">
+        {/* Sacred Forest Background */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 scale-110 sm:scale-105"
           style={{
-            backgroundImage: `url('images/Ethiopian-Church-Forests.webp')`,
+            backgroundImage: "url('images/Ethiopian-Church-Forests.webp')",
           }}
         />
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Deep Gradient Overlay for Readability */}
+        <div className="absolute inset-0 bg-linear-to-t from-emerald-950 via-emerald-950/60 to-emerald-950/40" />
 
         <div className="relative z-10 w-full max-w-md mx-auto">
-          {/* Highly Visible Clean Card – Mobile Optimized */}
           <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 lg:p-12 border border-emerald-100">
-            {/* Brand Section */}
+            {/* Brand Header */}
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="font-extrabold tracking-wide text-slate-900 text-3xl sm:text-4xl md:text-5xl leading-tight">
                 FOREST<span className="text-emerald-600">·</span>TRAILS
@@ -31,14 +31,13 @@ export default function SignupPage() {
                 Begin Your Journey
               </p>
               <p className="mt-3 text-slate-600 text-sm sm:text-base max-w-xs sm:max-w-sm mx-auto leading-relaxed px-2">
-                Explore Ethiopia&apos;s sacred forests and ancient trails –
+                Explore Ethiopia&apos;s sacred forests and ancient trails —
                 where nature and heritage meet.
               </p>
             </div>
 
-            {/* Social Logins – with official full-color icons */}
+            {/* Social Logins */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
-              {/* Google Button */}
               <button className="flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-4 px-4 bg-white hover:bg-gray-50 rounded-xl shadow-sm border border-gray-300 font-medium text-gray-700 transition active:scale-95">
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24">
                   <path
@@ -61,7 +60,6 @@ export default function SignupPage() {
                 Google
               </button>
 
-              {/* Apple Button */}
               <button className="flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-4 px-4 bg-black hover:bg-gray-900 rounded-xl text-white font-medium transition active:scale-95">
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24">
                   <path

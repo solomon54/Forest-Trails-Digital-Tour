@@ -1,29 +1,26 @@
-// pages/auth/login.tsx (or pages/Login.tsx)
-import type { NextPage } from "next";
+// pages/auth/login.tsx
 import LoginForm from "@/components/auth/LoginForm";
-import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/layout/Footer";
-import Link from "next/link";
+import Navbar from "@/components/navbar/Navbar";
 
-const LoginPage: NextPage = () => {
+export default function LoginPage() {
   return (
     <>
       <Navbar />
 
-      <div className="min-h-screen relative flex items-center justify-center py-8 px-4 sm:py-12 lg:py-16 bg-linear-to-b from-gray-100 to-slate-50 overflow-hidden">
-        {/* Subtle Ethiopian Church Forest Backdrop – same as Signup */}
+      {/* Unified with Signup & Upload Dashboard */}
+      <div className="min-h-screen relative flex items-center justify-center py-8 px-4 sm:py-12 lg:py-16 bg-emerald-950 overflow-hidden">
+        {/* Same Sacred Forest Background */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 scale-110 sm:scale-105"
           style={{
-            backgroundImage: `url('/images/Gorgora.webp')`,
+            backgroundImage: "url('images/Ethiopian-Church-Forests.webp')",
           }}
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-linear-to-t from-emerald-950 via-emerald-950/80 to-emerald-950/40" />
 
         <div className="relative z-10 w-full max-w-md mx-auto">
-          {/* Clean White Card – Identical Style to Signup */}
           <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 lg:p-12 border border-emerald-100">
-            {/* Page Title & Subtitle */}
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="font-extrabold tracking-wide text-slate-900 text-3xl sm:text-4xl md:text-5xl leading-tight">
                 FOREST<span className="text-emerald-600">·</span>TRAILS
@@ -32,12 +29,12 @@ const LoginPage: NextPage = () => {
                 Welcome Back
               </p>
               <p className="mt-3 text-slate-600 text-sm sm:text-base max-w-xs sm:max-w-sm mx-auto leading-relaxed px-2">
-                Log in to continue your journey through Ethiopia&apos;s sacred
-                forests and ancient trails.
+                Continue your journey through Ethiopia&apos;s sacred forests and
+                ancient trails.
               </p>
             </div>
 
-            {/* Social Logins – Matching Signup */}
+            {/* Same Social Buttons */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
               <button className="flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-4 px-4 bg-white hover:bg-gray-50 rounded-xl shadow-sm border border-gray-300 font-medium text-gray-700 transition active:scale-95">
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24">
@@ -76,7 +73,6 @@ const LoginPage: NextPage = () => {
               </button>
             </div>
 
-            {/* Divider */}
             <div className="relative mb-6 sm:mb-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-300" />
@@ -88,7 +84,6 @@ const LoginPage: NextPage = () => {
               </div>
             </div>
 
-            {/* Login Form */}
             <LoginForm />
           </div>
         </div>
@@ -97,6 +92,4 @@ const LoginPage: NextPage = () => {
       <Footer />
     </>
   );
-};
-
-export default LoginPage;
+}
