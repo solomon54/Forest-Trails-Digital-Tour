@@ -48,26 +48,27 @@ export default function AdminSidebar() {
         bg-white shadow-xl
         transition-all duration-300 ease-in-out
         z-30 left-0
-        ${isMobile ? "fixed top-16" : "sticky top-0"}
+        ${
+          isMobile
+            ? "fixed top-16 bg-white/85 backdrop-blur-sm shadow-2xl"
+            : "sticky top-0"
+        }
         ${expanded ? "w-56" : "w-14"}
         h-auto
-      `}
-    >
+      `}>
       {/* Header (scaled down) */}
       <div className="h-14 flex items-center justify-between px-3 bg-linear-to-r from-indigo-600 to-violet-600 shadow-md shrink-0">
         <h2
           className={`text-base font-semibold text-white overflow-hidden transition-all duration-300 ${
             expanded ? "w-36 opacity-100" : "w-0 opacity-0"
-          }`}
-        >
+          }`}>
           Admin Panel
         </h2>
 
         <button
           onClick={() => setExpanded(!expanded)}
           className="text-white text-xl hover:bg-white/20 rounded-md p-1 transition-all shrink-0"
-          aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
-        >
+          aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}>
           {expanded ? <HiChevronLeft /> : <HiChevronRight />}
         </button>
       </div>
@@ -90,15 +91,13 @@ export default function AdminSidebar() {
                         : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     }
                   `}
-                  onClick={() => isMobile && setExpanded(false)}
-                >
+                  onClick={() => isMobile && setExpanded(false)}>
                   <Icon className="text-lg shrink-0" />
 
                   <span
                     className={`overflow-hidden transition-all duration-300 whitespace-nowrap ${
                       expanded ? "w-28 opacity-100" : "w-0 opacity-0"
-                    }`}
-                  >
+                    }`}>
                     {item.label}
                   </span>
                 </Link>
