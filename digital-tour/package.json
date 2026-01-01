@@ -10,6 +10,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -19,6 +20,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "formidable": "^3.5.4",
+    "framer-motion": "^12.23.26",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.15.3",
     "next": "^16.0.7",

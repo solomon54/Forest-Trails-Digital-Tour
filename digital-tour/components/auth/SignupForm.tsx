@@ -296,11 +296,11 @@ const SignupForm: React.FC = () => {
 
       {/* Login Link */}
       <p className="text-center text-sm text-slate-600">
-        Already have an account?{" "}
+        Already on the trail?{" "}
         <Link
           href={`/Login?redirect=${encodeURIComponent(redirectTo)}`}
           className="font-semibold text-emerald-600 hover:text-emerald-700 underline-offset-2 hover:underline">
-          Log in
+          Log in here
         </Link>
       </p>
     </form>

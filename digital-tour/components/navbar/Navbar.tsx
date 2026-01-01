@@ -61,22 +61,20 @@ const Navbar = () => {
     <nav className="bg-gradient-to-l from-indigo-600 to-violet-600 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-
           {/* Left: Logo + Mobile Hamburger */}
           <div className="flex items-center">
             <div className="md:hidden mr-4">
               <button
                 onClick={toggleMenu}
                 className="text-white text-3xl focus:outline-none"
-                aria-label="Toggle menu"
-              >
+                aria-label="Toggle menu">
                 {isOpen ? <HiX /> : <HiMenu />}
               </button>
             </div>
 
             <Link href="/">
               <span className="text-white font-bold text-2xl cursor-pointer hover:text-emerald-200 transition">
-                ForestTrail
+                FOREST<span className="text-emerald-400">•</span>TRAILS
               </span>
             </Link>
           </div>
@@ -92,8 +90,7 @@ const Navbar = () => {
                       isActive(link.href)
                         ? "bg-white/30 text-white font-bold"
                         : "text-white hover:bg-white/20"
-                    }`}
-                  >
+                    }`}>
                     {link.label}
                   </span>
                 </Link>
@@ -108,7 +105,9 @@ const Navbar = () => {
 
       {/* Mobile Menu - unchanged */}
       {isOpen && (
-        <div ref={mobileMenuRef} className="md:hidden bg-white shadow-xl border-t">
+        <div
+          ref={mobileMenuRef}
+          className="md:hidden bg-white shadow-xl border-t">
           <div className="px-6 pt-5 pb-8 space-y-4">
             {visibleLinks.map((link) => (
               <Link key={link.href} href={link.href}>
@@ -118,8 +117,7 @@ const Navbar = () => {
                     isActive(link.href)
                       ? "bg-emerald-100 text-emerald-700"
                       : "text-gray-800 hover:bg-gray-100"
-                  }`}
-                >
+                  }`}>
                   {link.label}
                 </span>
               </Link>
