@@ -156,12 +156,15 @@ const LoginForm: React.FC = () => {
 
       {/* Submit Button */}
       <Button
-        buttonLabel={loading ? "Logging in..." : "Log In"}
-        buttonBackgroundColor="emerald"
         type="submit"
+        variant="solid"
+        intent="emerald"
+        size="xl"
+        loading={loading}
         disabled={loading}
-        className="w-full py-3.5 text-base font-semibold rounded-xl shadow-md hover:shadow-lg transition disabled:opacity-70"
-      />
+        className="w-full py-4 text-xl font-bold rounded-xl shadow-xl hover:shadow-emerald-500/50 transition">
+        {loading ? "Logging in..." : "Log In"}
+      </Button>
 
       {/* Sign Up Link */}
       <p className="text-center text-sm text-slate-600">

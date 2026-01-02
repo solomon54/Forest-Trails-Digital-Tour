@@ -287,12 +287,15 @@ const SignupForm: React.FC = () => {
 
       {/* Submit Button */}
       <Button
-        buttonLabel={loading ? "Creating Account..." : "Create Account"}
-        buttonBackgroundColor="emerald"
         type="submit"
+        variant="solid"
+        intent="emerald"
+        size="xl"
+        loading={loading}
         disabled={loading || passwordStrength === "weak"}
-        className="w-full py-3.5 text-base font-semibold rounded-xl shadow-md hover:shadow-lg transition disabled:opacity-70"
-      />
+        className="w-full py-4 text-xl font-bold rounded-xl shadow-xl hover:shadow-emerald-500/50 transition">
+        {loading ? "Creating Account..." : "Create Account"}
+      </Button>
 
       {/* Login Link */}
       <p className="text-center text-sm text-slate-600">
