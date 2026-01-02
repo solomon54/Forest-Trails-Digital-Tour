@@ -182,7 +182,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 - **Solomon Tsehay**  
   ID: 1501288  
   GitHub: [solomon54](https://github.com/solomon54)  
-  Contact: [Your Email or LinkedIn]
+  Contact: [solomontsehay54@gmail.com]
 
 ---
 
