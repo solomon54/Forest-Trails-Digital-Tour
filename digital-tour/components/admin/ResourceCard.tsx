@@ -62,8 +62,7 @@ export default function ResourceCard({
       role="button"
       tabIndex={0}
       onClick={() => !isDisabled && onClick(resource)}
-      onKeyDown={(e) => e.key === "Enter" && !isDisabled && onClick(resource)}
-    >
+      onKeyDown={(e) => e.key === "Enter" && !isDisabled && onClick(resource)}>
       <div className="p-5 flex flex-col gap-5 md:flex-row md:items-center">
         {/* Thumbnail - Full width on mobile, fixed on larger */}
         <div className="w-full md:w-40 lg:w-48 h-48 md:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
@@ -102,7 +101,9 @@ export default function ResourceCard({
                 {resource.description}
               </p>
             ) : (
-              <p className="text-sm text-gray-400 italic">No description provided</p>
+              <p className="text-sm text-gray-400 italic">
+                No description provided
+              </p>
             )}
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
@@ -130,9 +131,9 @@ export default function ResourceCard({
                     : resource.status === "approved"
                     ? "bg-emerald-100 text-emerald-800"
                     : "bg-red-100 text-red-800"
-                }`}
-              >
-                {resource.status.charAt(0).toUpperCase() + resource.status.slice(1)}
+                }`}>
+                {resource.status.charAt(0).toUpperCase() +
+                  resource.status.slice(1)}
               </span>
 
               {/* Lock Info */}
@@ -161,13 +162,17 @@ export default function ResourceCard({
               disabled={isDisabled}
               className={`
                 px-6 py-3 text-sm font-medium rounded-lg transition-all shadow-sm
-                ${isDisabled
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95"
+                ${
+                  isDisabled
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95"
                 }
-              `}
-            >
-              {isLockedByOther ? "Locked" : isLockedByMe ? "Continue Review" : "Review"}
+              `}>
+              {isLockedByOther
+                ? "Locked"
+                : isLockedByMe
+                ? "Continue Review"
+                : "Review"}
             </button>
           </div>
         </div>

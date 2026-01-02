@@ -12,8 +12,16 @@ interface Updates {
 interface Props {
   resource: Resource | null;
   onClose: () => void;
-  onApprove: (id: number, updates: Updates | undefined, adminId: number) => Promise<void>;
-  onReject: (id: number, reason: string | undefined, adminId: number) => Promise<void>;
+  onApprove: (
+    id: number,
+    updates: Updates | undefined,
+    adminId: number
+  ) => Promise<void>;
+  onReject: (
+    id: number,
+    reason: string | undefined,
+    adminId: number
+  ) => Promise<void>;
   busy?: boolean;
   currentUserId: number;
 }
@@ -49,7 +57,12 @@ export default function ResourceModal({
     if (resource) {
       setCaption(resource.caption ?? "");
       setDescription(resource.description ?? "");
-      setLocation(resource.resourceListing?.location ?? "");
+      setLocation(
+        resource.status === "approved"
+          ? resource.resourceListing?.location ?? ""
+          : resource.location ?? ""
+      );
+
       setPrice(resource.resourceListing?.price ?? "");
       setReason("");
       resetErrors();
@@ -108,7 +121,8 @@ export default function ResourceModal({
   };
 
   // Compute button states based on validation
-  const canApprove = !busy && location.trim() !== "" && price !== "" && Number(price) > 0;
+  const canApprove =
+    !busy && location.trim() !== "" && price !== "" && Number(price) > 0;
   const canReject = !busy && reason.trim().length >= 10;
 
   // Handle escape key to close modal
@@ -132,18 +146,19 @@ export default function ResourceModal({
   if (!resource) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
-    >
+      aria-labelledby="modal-title">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 flex justify-between items-start p-6 border-b border-gray-200">
           <div>
-            <h2 id="modal-title" className="text-xl md:text-2xl font-bold text-gray-900">
+            <h2
+              id="modal-title"
+              className="text-xl md:text-2xl font-bold text-gray-900">
               Review Resource #{resource.id}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -155,8 +170,7 @@ export default function ResourceModal({
             disabled={busy}
             className="text-gray-600 hover:text-red-600 text-3xl leading-none disabled:opacity-50 transition-transform hover:scale-110"
             aria-label="Close modal"
-            type="button"
-          >
+            type="button">
             &times;
           </button>
         </div>
@@ -171,7 +185,9 @@ export default function ResourceModal({
                     src={resource.url}
                     controls
                     className="w-full aspect-video object-cover"
-                    aria-label={`Video resource: ${resource.caption || "Untitled"}`}
+                    aria-label={`Video resource: ${
+                      resource.caption || "Untitled"
+                    }`}
                   />
                 ) : (
                   <img
@@ -187,16 +203,22 @@ export default function ResourceModal({
                 <p className="flex justify-between">
                   <span className="font-medium text-gray-700">Type:</span>
                   <span className="text-gray-900">
-                    {resource.type.charAt(0).toUpperCase() + resource.type.slice(1)}
+                    {resource.type.charAt(0).toUpperCase() +
+                      resource.type.slice(1)}
                   </span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium text-gray-700">Status:</span>
-                  <span className={`font-semibold ${
-                    resource.status === "pending" ? "text-yellow-600" :
-                    resource.status === "approved" ? "text-emerald-600" : "text-red-600"
-                  }`}>
-                    {resource.status.charAt(0).toUpperCase() + resource.status.slice(1)}
+                  <span
+                    className={`font-semibold ${
+                      resource.status === "pending"
+                        ? "text-yellow-600"
+                        : resource.status === "approved"
+                        ? "text-emerald-600"
+                        : "text-red-600"
+                    }`}>
+                    {resource.status.charAt(0).toUpperCase() +
+                      resource.status.slice(1)}
                   </span>
                 </p>
                 <p className="flex justify-between">
@@ -205,7 +227,7 @@ export default function ResourceModal({
                     {new Date(resource.created_at).toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
-                      year: "numeric"
+                      year: "numeric",
                     })}
                   </span>
                 </p>
@@ -217,7 +239,9 @@ export default function ResourceModal({
           <div className="lg:col-span-2 text-gray-500 xl:order-1 space-y-6">
             <div className="grid grid-cols-1 gap-5">
               <div>
-                <label htmlFor="caption-input" className="block text-sm font-semibold text-gray-800 mb-1.5">
+                <label
+                  htmlFor="caption-input"
+                  className="block text-sm font-semibold text-gray-800 mb-1.5">
                   Caption
                 </label>
                 <input
@@ -232,7 +256,9 @@ export default function ResourceModal({
               </div>
 
               <div>
-                <label htmlFor="description-input" className="block text-sm font-semibold text-gray-800 mb-1.5">
+                <label
+                  htmlFor="description-input"
+                  className="block text-sm font-semibold text-gray-800 mb-1.5">
                   Description
                 </label>
                 <textarea
@@ -248,7 +274,9 @@ export default function ResourceModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label htmlFor="location-input" className="block text-sm font-semibold text-gray-800 mb-1.5">
+                  <label
+                    htmlFor="location-input"
+                    className="block text-sm font-semibold text-gray-800 mb-1.5">
                     Location <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -261,23 +289,32 @@ export default function ResourceModal({
                     }}
                     disabled={busy}
                     className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-100 transition text-sm md:text-base ${
-                      locationError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-emerald-600/70"
+                      locationError
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-emerald-600/70"
                     }`}
                     placeholder="e.g., New York, USA"
                   />
                   {locationError && (
                     <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                      <span className="text-lg" aria-hidden="true">⚠</span> {locationError}
+                      <span className="text-lg" aria-hidden="true">
+                        ⚠
+                      </span>{" "}
+                      {locationError}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="price-input" className="block text-sm font-semibold text-gray-800 mb-1.5">
+                  <label
+                    htmlFor="price-input"
+                    className="block text-sm font-semibold text-gray-800 mb-1.5">
                     Price (USD) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
                     <input
                       id="price-input"
                       type="number"
@@ -285,20 +322,28 @@ export default function ResourceModal({
                       min="0"
                       value={price}
                       onChange={(e) => {
-                        const val = e.target.value === "" ? "" : parseFloat(e.target.value);
+                        const val =
+                          e.target.value === ""
+                            ? ""
+                            : parseFloat(e.target.value);
                         setPrice(val);
                         if (priceError) setPriceError("");
                       }}
                       disabled={busy}
                       className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-100 transition text-sm md:text-base ${
-                        priceError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-emerald-600/70"
+                        priceError
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300 focus:ring-emerald-600/70"
                       }`}
                       placeholder="0.00"
                     />
                   </div>
                   {priceError && (
                     <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                      <span className="text-lg" aria-hidden="true">⚠</span> {priceError}
+                      <span className="text-lg" aria-hidden="true">
+                        ⚠
+                      </span>{" "}
+                      {priceError}
                     </p>
                   )}
                 </div>
@@ -307,7 +352,9 @@ export default function ResourceModal({
 
             {/* Rejection Reason - Only show when needed */}
             <div className="p-4 md:p-5 bg-red-50 border border-red-200 rounded-xl space-y-3">
-              <label htmlFor="reject-reason-input" className="block text-sm font-semibold text-red-900">
+              <label
+                htmlFor="reject-reason-input"
+                className="block text-sm font-semibold text-red-900">
                 Rejection Reason <span className="text-red-600">*</span>
                 <span className="block text-xs font-normal text-red-700 mt-1">
                   Required only if rejecting (min. 10 characters)
@@ -325,13 +372,18 @@ export default function ResourceModal({
                 disabled={busy}
                 rows={3}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 resize-y transition text-sm md:text-base ${
-                  reasonError ? "border-red-500 focus:ring-red-500" : "border-red-300 focus:ring-red-500"
+                  reasonError
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-red-300 focus:ring-red-500"
                 }`}
                 placeholder="Provide specific, constructive feedback for the user..."
               />
               {reasonError && (
                 <p className="text-sm text-red-700 flex items-center gap-1">
-                  <span className="text-lg" aria-hidden="true">⚠</span> {reasonError}
+                  <span className="text-lg" aria-hidden="true">
+                    ⚠
+                  </span>{" "}
+                  {reasonError}
                 </p>
               )}
             </div>
@@ -346,8 +398,7 @@ export default function ResourceModal({
                     ? "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800"
                     : "bg-emerald-600 text-gray-100 cursor-not-allowed opacity-60"
                 }`}
-                type="button"
-              >
+                type="button">
                 {busy ? "Approving..." : "Approve & Sync to Listing"}
               </button>
 
@@ -359,8 +410,7 @@ export default function ResourceModal({
                     ? "bg-red-600 text-white hover:bg-red-700 active:bg-red-800"
                     : "bg-red-600 text-gray-100 cursor-not-allowed opacity-60"
                 }`}
-                type="button"
-              >
+                type="button">
                 {busy ? "Rejecting..." : "Reject Resource"}
               </button>
             </div>
