@@ -1,3 +1,4 @@
+//pages/api/resources/[id].ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Resource, Listing } from "@/models";
 import { sequelize } from "../../../lib/db";
