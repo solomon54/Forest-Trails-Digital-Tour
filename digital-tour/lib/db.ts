@@ -1,24 +1,14 @@
 // lib/db.ts
 import { Sequelize, DataTypes } from "sequelize";
-import fs from "fs";
-import path from "path";
-
-const sslCaPath = path.resolve(process.env.DB_SSL_CA || "./certs/ca.pem");
 
 export const sequelize = new Sequelize(
   process.env.DB_NAME!,
   process.env.DB_USER!,
-  process.env.DB_PASS || "<!sol@12>",
+  process.env.DB_PASS || "<!sol@12>"!,
   {
     host: process.env.DB_HOST!,
-    port: Number(process.env.DB_PORT) || 3306,
     dialect: "mysql",
-    dialectOptions: {
-      ssl: {
-        ca: fs.readFileSync(sslCaPath),
-      },
-    },
-    logging: console.log, // optional: shows SQL queries
+    logging: console.log, // optional, logs queries
   }
 );
 
