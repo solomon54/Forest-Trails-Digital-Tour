@@ -128,10 +128,12 @@ The project uses a modular, feature-based architecture for maintainability.
 ### Installation
 
 1. Clone the repo:
+
    ```bash
    git clone https://github.com/solomon54/Forest-Trails-Digital-Tour.git
    cd digital-tour
    ```
+
 2. Install dependencies:
    ```bash
    npm install
