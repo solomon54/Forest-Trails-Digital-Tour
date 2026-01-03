@@ -1,15 +1,14 @@
-
 // pages/admin/index.tsx
 import { Suspense } from "react";
-import { useRouter } from "next/router";  // Add for redirect
+import { useRouter } from "next/router"; // Add for redirect
 import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
 import AdminLayout from "@/components/layout/AdminLayout";
 
 // Lazy load dashboard
-const Dashboard = dynamic(() => import("@/components/admin/dashboard/Dashboard"), {
-  suspense: true,
-});
+const Dashboard = dynamic(
+  () => import("@/components/admin/dashboard/Dashboard")
+);
 
 // Skeleton UI (loading state)
 function DashboardSkeleton() {
@@ -29,7 +28,7 @@ export default function AdminPage() {
   if (loading) return <DashboardSkeleton />;
   if (!user) return null;
   if (!isAdmin) {
-    router.push('/login');  // Redirect instead of static text
+    router.push("/login"); // Redirect instead of static text
     return null;
   }
 

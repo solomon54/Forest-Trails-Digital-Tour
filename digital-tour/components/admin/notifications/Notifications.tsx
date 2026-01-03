@@ -1,3 +1,4 @@
+//components/admin/notifications/Notifications.tsx
 export default function NotificationItem({ n }: any) {
   return (
     <div className={`notification ${n.is_read ? "read" : "unread"}`}>

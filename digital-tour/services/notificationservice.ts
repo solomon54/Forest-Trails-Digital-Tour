@@ -1,22 +1,26 @@
 // services/notificationservice.ts
 import apiClient from "./apiClient";
-import type { Notification } from "@/types/notification";
+import type { Notification } from "@/store/slices/notificationSlice";
 
 const notificationService = {
-  // Get notifications by user
-  async getByUser(userId: number): Promise<Notification[]> {
+  // Pass viewMode to filter logic on the server
+  async getByUser(
+    userId: number,
+    viewMode: "user" | "admin" = "user"
+  ): Promise<Notification[]> {
     const res = await apiClient.get("/notifications", {
-      params: { userId },
+      params: {
+        userId,
+        isAdmin: viewMode === "admin" ? "true" : "false", //
+      },
     });
     return res.data;
   },
 
-  // Mark one notification as read
   async markRead(id: number): Promise<void> {
     await apiClient.put(`/notifications/${id}`);
   },
 
-  // Mark all notifications as read (optional endpoint)
   async markAllRead(): Promise<void> {
     await apiClient.put("/notifications");
   },

@@ -13,21 +13,21 @@ import { getListingById } from "@/services/listingService";
 import { useAuth } from "@/hooks/useAuth";
 
 /* =======================
-   Types
+   Types — MATCHES PropertyDetail
 ======================= */
 interface ListingDetail {
   id: number;
   name: string;
-  location: string;
-  price: number;
-  image: string;
-  description: string;
-  media: { id: number; url: string; type: string }[];
-  reviews: {
+  location?: string | null;
+  price?: number | null;
+  description?: string | null;
+  media: {
     id: number;
+    type: "image" | "video";
+    url: string;
+  }[];
+  reviews?: {
     rating: number;
-    comment: string;
-    user: { name: string };
   }[];
 }
 
@@ -40,44 +40,52 @@ export default function TourPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Ref for the Sign In button (non-logged-in user)
   const signInRef = useRef<HTMLDivElement>(null);
 
-  /* =======================
-     Fetch Listing (PUBLIC)
-======================= */
   useEffect(() => {
     if (!id) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
-    getListingById(id as string)
+    getListingById(Number(id))
       .then((data) => {
         setListing({
           id: data.id,
           name: data.name,
-          location: data.location,
-          price: data.price,
-          image: data.resources?.[0]?.url || "/images/placeholder.png",
-          description: data.description,
-          media: data.resources || [],
-          reviews: data.reviews || [],
+          location: data.location ?? "Location TBD",
+          price: data.price ?? 0,
+          description: data.description ?? "No description available.",
+          media: (data.resources || []).map((r: any) => ({
+            id: r.id,
+            type: r.type as "image" | "video",
+            url: r.url,
+          })),
+          reviews: (data as any).reviews || [],
         });
       })
       .catch(() => setError("Failed to load tour details."))
       .finally(() => setLoading(false));
   }, [id]);
 
-  /* =======================
-     Page States
-======================= */
-  if (loading) return <><Navbar /><CardSkeleton /><Footer /></>;
-  if (error || !listing) return <><Navbar /><p className="text-red-600 text-center p-8">{error}</p><Footer /></>;
+  if (loading)
+    return (
+      <>
+        <Navbar />
+        <CardSkeleton />
+        <Footer />
+      </>
+    );
+  if (error || !listing)
+    return (
+      <>
+        <Navbar />
+        <p className="text-red-600 text-center p-8">{error}</p>
+        <Footer />
+      </>
+    );
 
-  /* =======================
-     Smooth Scroll Handler
-======================= */
   const handleCheckAvailability = () => {
     if (user) {
       const bookingEl = document.getElementById("bookingForm");
@@ -87,39 +95,27 @@ export default function TourPage() {
     }
   };
 
-  /* =======================
-     Render
-======================= */
   return (
     <main className="bg-neutral-50 min-h-screen">
       <Navbar />
+      <PropertyDetail property={listing} />
 
-      {/* Public Content */}
-      <PropertyDetail
-        property={listing} />
-
-      {/* Booking Section */}
       <section aria-labelledby="booking-heading" className="max-w-7xl mx-auto">
-        <h2 id="booking-heading" className="sr-only">Booking</h2>
+        <h2 id="booking-heading" className="sr-only">
+          Booking
+        </h2>
 
         {authLoading && <CardSkeleton />}
 
         {!authLoading && !user && (
-          <div ref={signInRef} className="text-center" id="bookingForm"> 
+          <div ref={signInRef} className="text-center py-12" id="bookingForm">
             <button
               onClick={() =>
-                router.push(`/Login?redirect=${encodeURIComponent(router.asPath)}`)
+                router.push(
+                  `/Login?redirect=${encodeURIComponent(router.asPath)}`
+                )
               }
-              className="
-                px-6 py-3 sm:px-8 sm:py-4
-                bg-emerald-600
-                text-white
-                rounded-lg
-                transition-transform duration-200
-                hover:scale-105
-                focus:outline-none focus:ring-2 focus:ring-emerald-400
-              "
-            >
+              className="px-8 py-4 bg-emerald-600 text-white rounded-lg hover:scale-105 transition">
               Sign in to book &rarr;
             </button>
           </div>

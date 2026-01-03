@@ -1,58 +1,63 @@
-//store/slices/notificationSlice
+// digital-tour/store/slices/notificationSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+/** * Matches the MySQL Schema exactly:
+ * is_admin (tinyint) -> boolean
+ * is_read  (tinyint) -> boolean
+ * created_at (timestamp) -> string
+ */
 export interface Notification {
-  id: string;
+  id: number;
+  user_id: number;
+  type: "success" | "info" | "warning" | "error";
+  is_admin: boolean;
   title: string;
   message: string;
-  read: boolean;
-  createdAt: string;
+  is_read: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface NotificationState {
   items: Notification[];
-  unreadCount: number;
 }
 
 const initialState: NotificationState = {
   items: [],
-  unreadCount: 0,
 };
 
 const notificationSlice = createSlice({
   name: "notifications",
   initialState,
   reducers: {
+    // Completely replace notifications (on fetch)
     setNotifications(state, action: PayloadAction<Notification[]>) {
       state.items = action.payload;
-      state.unreadCount = action.payload.filter(n => !n.read).length;
     },
 
+    // Add a single notification (for real-time Pusher/Socket events)
     addNotification(state, action: PayloadAction<Notification>) {
-      state.items.unshift(action.payload);
-      state.unreadCount += action.payload.read ? 0 : 1;
+      state.items.unshift(action.payload); // Add to the top of the list
     },
 
-    markAsRead(state, action: PayloadAction<string>) {
-      const notif = state.items.find(n => n.id === action.payload);
-      if (notif && !notif.read) {
-        notif.read = true;
-        state.unreadCount -= 1;
+    // Update is_read for a specific notification
+    markAsRead(state, action: PayloadAction<number>) {
+      const index = state.items.findIndex((n) => n.id === action.payload);
+      if (index !== -1) {
+        state.items[index].is_read = true;
       }
     },
 
+    // Global update for the current view
     markAllAsRead(state) {
-      state.items.forEach(n => (n.read = true));
-      state.unreadCount = 0;
+      state.items.forEach((n) => {
+        n.is_read = true;
+      });
     },
   },
 });
 
-export const {
-  setNotifications,
-  addNotification,
-  markAsRead,
-  markAllAsRead,
-} = notificationSlice.actions;
+export const { setNotifications, addNotification, markAsRead, markAllAsRead } =
+  notificationSlice.actions;
 
 export default notificationSlice.reducer;

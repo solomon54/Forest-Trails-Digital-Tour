@@ -92,7 +92,9 @@ export default function AdminResources() {
       setResources((prev) => prev.filter((r) => r.id !== id));
       setSelected(null);
     } catch (err) {
-      alert("Failed to approve resource. It may have been modified by another admin.");
+      alert(
+        "Failed to approve resource. It may have been modified by another admin."
+      );
       await fetchResources();
     } finally {
       setIsBusy(false);
@@ -100,13 +102,16 @@ export default function AdminResources() {
   };
 
   // Reject resource
-  const handleReject = async (id: number, reason: string) => {
-    if (!user || !reason.trim()) return;
+  const handleReject = async (
+    id: number,
+    reason: string | undefined,
+    adminId: number
+  ) => {
+    if (!user || !reason?.trim()) return;
     setIsBusy(true);
     try {
-      await adminService.rejectResource(id, reason.trim(), user.id);
+      await adminService.rejectResource(id, reason.trim(), adminId);
 
-      // Optimistic removal
       setResources((prev) => prev.filter((r) => r.id !== id));
       setSelected(null);
     } catch (err) {
@@ -119,11 +124,19 @@ export default function AdminResources() {
 
   // Auth guards
   if (authLoading) {
-    return <AdminLayout><div className="p-8 text-center">Loading...</div></AdminLayout>;
+    return (
+      <AdminLayout>
+        <div className="p-8 text-center">Loading...</div>
+      </AdminLayout>
+    );
   }
 
   if (!user || !isAdmin) {
-    return <AdminLayout><div className="p-8 text-center text-red-600">Access denied.</div></AdminLayout>;
+    return (
+      <AdminLayout>
+        <div className="p-8 text-center text-red-600">Access denied.</div>
+      </AdminLayout>
+    );
   }
 
   return (
@@ -147,11 +160,16 @@ export default function AdminResources() {
         )}
 
         {/* Resources List */}
-        <Suspense fallback={<div className="text-center py-8">Loading resources...</div>}>
+        <Suspense
+          fallback={
+            <div className="text-center py-8">Loading resources...</div>
+          }>
           {resources.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
               <div className="bg-gray-200 border-2 border-dashed rounded-xl w-24 h-24 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-900">No pending resources</p>
+              <p className="text-lg font-medium text-gray-900">
+                No pending resources
+              </p>
               <p className="text-sm text-gray-500 mt-1">
                 All submissions have been processed.
               </p>

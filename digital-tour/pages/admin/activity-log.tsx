@@ -6,14 +6,17 @@ import AdminLayout from "@/components/layout/AdminLayout";
 import ActivitySearch from "@/components/admin/activity/ActivitySearch";
 import ActivityList from "@/components/admin/activity/ActivityList";
 import { ActivityPagination } from "@/components/admin/activity/ActivityPagination";
-import { Activity, ActivityMeta } from "@/components/admin/activity/activity.types";
+import {
+  Activity,
+  ActivityMeta,
+} from "@/components/admin/activity/activity.types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function ActivityLogPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  
+
   // store online status per userId
   const [userStatus, setUserStatus] = useState<Record<number, boolean>>({});
 
@@ -21,7 +24,9 @@ export default function ActivityLogPage() {
     activities: Activity[];
     meta: ActivityMeta;
   }>(
-    `/api/admin/activity-log?page=${page}&limit=10&search=${encodeURIComponent(search)}`,
+    `/api/admin/activity-log?page=${page}&limit=10&search=${encodeURIComponent(
+      search
+    )}`,
     fetcher,
     { keepPreviousData: true }
   );
@@ -36,11 +41,11 @@ export default function ActivityLogPage() {
     });
 
     socket.on("user:online", ({ userId }) => {
-      setUserStatus(prev => ({ ...prev, [userId]: true }));
+      setUserStatus((prev) => ({ ...prev, [userId]: true }));
     });
 
     socket.on("user:offline", ({ userId }) => {
-      setUserStatus(prev => ({ ...prev, [userId]: false }));
+      setUserStatus((prev) => ({ ...prev, [userId]: false }));
     });
 
     return () => {
@@ -49,12 +54,12 @@ export default function ActivityLogPage() {
   }, []);
 
   // Merge online status into activities for child components
-  const activitiesWithStatus = data?.activities.map(act => ({
+  const activitiesWithStatus = data?.activities.map((act) => ({
     ...act,
-    admin: { 
+    admin: {
       ...act.admin,
-      isOnline: userStatus[act.admin.id] ?? false
-    }
+      isOnline: userStatus[act.admin.id] ?? false,
+    },
   }));
 
   return (
@@ -62,7 +67,9 @@ export default function ActivityLogPage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Activity Log</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Admin Activity Log
+          </h1>
           <p className="text-sm text-gray-600 mt-1">
             Track administrative actions across the system
           </p>
@@ -81,11 +88,12 @@ export default function ActivityLogPage() {
         {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center mb-6">
-            <p className="font-medium text-red-800">Failed to load activity log</p>
+            <p className="font-medium text-red-800">
+              Failed to load activity log
+            </p>
             <button
               onClick={() => mutate()}
-              className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-            >
+              className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
               Retry
             </button>
           </div>
@@ -105,7 +113,7 @@ export default function ActivityLogPage() {
             <ActivityList activities={activitiesWithStatus} />
 
             {/* Pagination */}
-            {data.meta.totalPages > 1 && (
+            {data && data.meta.totalPages > 1 && (
               <ActivityPagination
                 page={page}
                 totalPages={data.meta.totalPages}

@@ -16,7 +16,7 @@ const menuItems = [
   { label: "Dashboard", path: "/admin", icon: HiHome },
   { label: "Users", path: "/admin/users", icon: HiUsers },
   { label: "Bookings", path: "/admin/bookings", icon: HiCalendar },
-  { label: "Notifications", path: "#", icon: HiBell },
+  { label: "Notifications", path: "/admin/notifications", icon: HiBell },
   { label: "Resources", path: "/admin/resources", icon: HiFolder },
 ];
 

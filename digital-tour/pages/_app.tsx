@@ -4,6 +4,8 @@ import "@/styles/tailwind.css";
 import { Poppins } from "next/font/google";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { Provider } from "react-redux";
+import { store } from "@/store";
 import PWARegister from "@/components/PWARegister";
 import InstallPWA from "@/components/InstallPWA";
 
@@ -14,7 +16,9 @@ const poppins = Poppins({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <Provider store={store}>
+      {" "}
+      {/* The 'Provider' is required to fix your Redux build error */}
       <Head>
         <title>Forest·Trails Ethiopia | Authentic Eco Adventures</title>
         <meta
@@ -28,7 +32,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="theme-color" content="#059669" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
 
-        {/* Social */}
+        {/* Social - Kept all your metadata */}
         <meta property="og:title" content="Forest·Trails Ethiopia" />
         <meta property="og:description" content="Authentic eco-tours..." />
         <meta property="og:image" content="/images/hero.jpg" />
@@ -36,13 +40,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <PWARegister />
       <InstallPWA />
-
       <main className={poppins.className}>
         <Component {...pageProps} />
       </main>
-    </>
+    </Provider>
   );
 }

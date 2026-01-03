@@ -3,37 +3,55 @@ export interface User {
   id: number;
   name: string;
   email?: string;
-  role?: 'user' | 'admin';
+  role?: "user" | "admin";
   photo_url?: string | null;
 }
 
 export interface Resource {
-  locked_by: number;
-  resourceListing: any;
   id: number;
   listing_id: number;
-  type: 'image' | 'video';
+  type: "image" | "video";
   url: string;
   caption?: string | null;
   description?: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   created_at: string;
   updated_at: string;
-  // optional relations that server may include
+
+  // Locking feature
+  locked_by?: number | null;
+  lock_expires_at?: string | null;
+  locker?: { id: number; name: string } | undefined;
+
+  // Relations from server
   user?: User | null;
-  listing?: { id: number; name?: string } | null;
+
+  // For pending resources — data from the parent Listing
+  listing?: {
+    id: number;
+    name?: string;
+    location?: string | null;
+    price?: number | null;
+  } | null;
+
+  // For approved resources — when server includes synced listing data directly on resource
+  resourceListing?: {
+    location?: string | null;
+    price?: number | null;
+  } | null;
 }
 
 export interface Listing {
-  url: Text;
-  creator: string;
   id: number;
   name: string;
   description?: string | null;
   location?: string | null;
-  price?: string | number | null;
+  price?: number | null;
+  url?: string | null;
+  creator?: { id: number; name: string } | null;
   created_by?: number | null;
   created_at?: string;
   updated_at?: string;
+
   resources?: Resource[];
 }

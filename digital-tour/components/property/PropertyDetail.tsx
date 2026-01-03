@@ -5,16 +5,34 @@ import { FaDollarSign, FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import ReviewSection from "./review/ReviewSection";
 
 interface PropertyDetailProps {
-  property: ListingDetail;
+  property: {
+    id: number;
+    name: string;
+    location?: string | null;
+    price?: number | null;
+    description?: string | null;
+    media: {
+      id: number;
+      type: "image" | "video";
+      url: string;
+    }[];
+    reviews?: {
+      rating: number;
+    }[];
+  };
   onCheckAvailability?: () => void;
 }
-
-export default function PropertyDetail({ property, onCheckAvailability }: PropertyDetailProps) {
+export default function PropertyDetail({
+  property,
+  onCheckAvailability,
+}: PropertyDetailProps) {
   const reviewCount = property.reviews?.length ?? 0;
 
   const averageRating = useMemo(() => {
     if (!reviewCount) return 0;
-    return property.reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount;
+    return (
+      property.reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+    );
   }, [property.reviews, reviewCount]);
 
   const descriptionParagraphs = useMemo(() => {
@@ -36,9 +54,21 @@ export default function PropertyDetail({ property, onCheckAvailability }: Proper
     const hasHalf = rating - fullStars >= 0.5;
 
     for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) stars.push(<FaStar key={i} className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5" />);
-      else if (i === fullStars + 1 && hasHalf) stars.push(<FaStarHalfAlt key={i} className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5" />);
-      else stars.push(<FaRegStar key={i} className="text-gray-300 w-4 h-4 sm:w-5 sm:h-5" />);
+      if (i <= fullStars)
+        stars.push(
+          <FaStar key={i} className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5" />
+        );
+      else if (i === fullStars + 1 && hasHalf)
+        stars.push(
+          <FaStarHalfAlt
+            key={i}
+            className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5"
+          />
+        );
+      else
+        stars.push(
+          <FaRegStar key={i} className="text-gray-300 w-4 h-4 sm:w-5 sm:h-5" />
+        );
     }
 
     return <div className="flex gap-1 flex-wrap">{stars}</div>;
@@ -80,8 +110,7 @@ export default function PropertyDetail({ property, onCheckAvailability }: Proper
             <button
               onClick={scrollToBooking}
               aria-label="Check availability"
-              className="mt-2 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3 rounded-xl shadow-md transition mb-2"
-            >
+              className="mt-2 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3 rounded-xl shadow-md transition mb-2">
               Check Availability
             </button>
           </div>
@@ -93,8 +122,9 @@ export default function PropertyDetail({ property, onCheckAvailability }: Proper
             {property.media.map((m, idx) => (
               <div
                 key={m.id}
-                className={`overflow-hidden rounded-xl shadow-lg ${idx === 0 ? "md:col-span-2 md:row-span-2" : ""}`}
-              >
+                className={`overflow-hidden rounded-xl shadow-lg ${
+                  idx === 0 ? "md:col-span-2 md:row-span-2" : ""
+                }`}>
                 {m.type === "image" ? (
                   <img
                     src={m.url}
@@ -117,9 +147,15 @@ export default function PropertyDetail({ property, onCheckAvailability }: Proper
 
         {/* Description */}
         <div className="mb-12">
-          <h2 className="text-xl text-gray-700 sm:text-2xl font-semibold mb-4">Description</h2>
+          <h2 className="text-xl text-gray-700 sm:text-2xl font-semibold mb-4">
+            Description
+          </h2>
           <div className="text-gray-600 text-sm sm:text-base space-y-4">
-            {descriptionParagraphs?.length ? descriptionParagraphs.map((p, i) => <p key={i}>{p}</p>) : <p className="italic">No description available.</p>}
+            {descriptionParagraphs?.length ? (
+              descriptionParagraphs.map((p, i) => <p key={i}>{p}</p>)
+            ) : (
+              <p className="italic">No description available.</p>
+            )}
           </div>
         </div>
 
@@ -132,8 +168,7 @@ export default function PropertyDetail({ property, onCheckAvailability }: Proper
         <button
           onClick={scrollToBooking}
           aria-label="Check availability"
-          className="w-full bg-emerald-600 text-white font-semibold py-4 text-lg"
-        >
+          className="w-full bg-emerald-600 text-white font-semibold py-4 text-lg">
           Check Availability
         </button>
       </div>

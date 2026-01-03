@@ -26,7 +26,9 @@ export default async function handler(
 
   // === Only super admins can manage roles ===
   if (!currentUser.is_super_admin) {
-    return res.status(403).json({ message: "Only super administrators can manage user roles" });
+    return res
+      .status(403)
+      .json({ message: "Only super administrators can manage user roles" });
   }
 
   // === Parse and validate ID ===
@@ -60,25 +62,34 @@ export default async function handler(
   };
 
   // === Parse body ===
-  const { role: newRole, reason } = req.body as { role?: string; reason?: string };
+  const { role: newRole, reason } = req.body as {
+    role?: string;
+    reason?: string;
+  };
 
   if (!newRole || typeof newRole !== "string") {
     return res.status(400).json({ message: "Role field is required" });
   }
 
   if (!["admin", "user"].includes(newRole)) {
-    return res.status(400).json({ message: "Invalid role value", received: newRole });
+    return res
+      .status(400)
+      .json({ message: "Invalid role value", received: newRole });
   }
 
   // === Critical protection: never allow demoting a super admin ===
   if (newRole === "user" && user.is_super_admin) {
-    return res.status(403).json({ message: "Cannot revoke privileges from a super administrator" });
+    return res
+      .status(403)
+      .json({ message: "Cannot revoke privileges from a super administrator" });
   }
 
   // === Apply changes ===
   if (newRole === "admin") {
     if (user.role === "admin") {
-      return res.status(400).json({ message: "User is already an administrator" });
+      return res
+        .status(400)
+        .json({ message: "User is already an administrator" });
     }
     user.role = "admin";
   }
@@ -89,7 +100,9 @@ export default async function handler(
     }
 
     if (!reason || typeof reason !== "string" || reason.trim() === "") {
-      return res.status(400).json({ message: "Reason is required when revoking privileges" });
+      return res
+        .status(400)
+        .json({ message: "Reason is required when revoking privileges" });
     }
 
     user.role = "user";
@@ -112,12 +125,12 @@ export default async function handler(
        VALUES (?, ?, 'user', ?, ?, ?, ?, NOW())`,
       {
         replacements: [
-          currentUser.id,                          // admin_id
+          currentUser.id, // admin_id
           newRole === "admin" ? "grant_admin" : "revoke_admin", // action
-          userId,                                   // target_id
-          JSON.stringify(beforeState),              // before_state
-          JSON.stringify(afterState),               // after_state
-          newRole === "user" ? reason.trim() : null // reason (only for revoke)
+          userId, // target_id
+          JSON.stringify(beforeState), // before_state
+          JSON.stringify(afterState), // after_state
+          newRole === "user" ? reason!.trim() : null,
         ],
         type: QueryTypes.INSERT,
       }

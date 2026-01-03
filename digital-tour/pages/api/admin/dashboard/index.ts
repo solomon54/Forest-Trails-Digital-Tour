@@ -7,11 +7,11 @@ import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 type DashboardResponse = {
   stats: {
     totalUsers: number;
-    activeBookings: number;         
-    pendingNotifications: number;   
-    pendingResources: number;      
-    liveListings: number;          
-    totalResources: number;        
+    activeBookings: number;
+    pendingNotifications: number;
+    pendingResources: number;
+    liveListings: number;
+    totalResources: number;
     systemUptime: string;
   };
   recentActivity: {
@@ -37,7 +37,7 @@ export default async function handler(
 
   let payload;
   try {
-    payload = verifyToken(token);
+    payload = verifyToken(token) as { id: number };
   } catch {
     return res.status(401).json({ message: "Invalid token" });
   }
@@ -63,7 +63,9 @@ export default async function handler(
       totalResourcesResult,
       auditsResult,
     ] = await Promise.all([
-      sequelize.query(`SELECT COUNT(*) AS count FROM users`, { type: QueryTypes.SELECT }),
+      sequelize.query(`SELECT COUNT(*) AS count FROM users`, {
+        type: QueryTypes.SELECT,
+      }),
       sequelize.query(
         `SELECT COUNT(*) AS count FROM bookings WHERE status IN ('pending', 'confirmed')`,
         { type: QueryTypes.SELECT }
@@ -80,10 +82,9 @@ export default async function handler(
         `SELECT COUNT(*) AS count FROM listings WHERE status = 'active'`,
         { type: QueryTypes.SELECT }
       ),
-      sequelize.query(
-        `SELECT COUNT(*) AS count FROM resources`,
-        { type: QueryTypes.SELECT }
-      ),
+      sequelize.query(`SELECT COUNT(*) AS count FROM resources`, {
+        type: QueryTypes.SELECT,
+      }),
       sequelize.query(
         `
         SELECT 
@@ -146,22 +147,21 @@ export default async function handler(
           actionText = log.action.replace(/_/g, " ");
       }
 
-            const nameParts = userName.trim().split(/\s+/);
+      const nameParts = userName.trim().split(/\s+/);
 
-            const userInitial =
-            nameParts.length > 1
-                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
-                : nameParts[0][0].toUpperCase();
+      const userInitial =
+        nameParts.length > 1
+          ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+          : nameParts[0][0].toUpperCase();
 
-            return {
-            id: log.id,
-            userName,
-            userInitial,
-            action: actionText,
-            target: targetText,
-            timestamp: formatRelativeTime(new Date(log.created_at)),
-            };
-
+      return {
+        id: log.id,
+        userName,
+        userInitial,
+        action: actionText,
+        target: targetText,
+        timestamp: formatRelativeTime(new Date(log.created_at)),
+      };
     });
 
     return res.status(200).json({ stats, recentActivity });

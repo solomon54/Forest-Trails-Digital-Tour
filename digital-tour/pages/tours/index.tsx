@@ -23,8 +23,7 @@ function TourMedia({ url, name, location }: TourMediaProps) {
     return (
       <div
         className="w-full h-48 sm:h-56 lg:h-64 bg-gray-200 rounded-t-2xl flex items-center justify-center"
-        aria-label="No media available"
-      >
+        aria-label="No media available">
         <span className="text-gray-400 text-sm">No image available</span>
       </div>
     );
@@ -41,8 +40,7 @@ function TourMedia({ url, name, location }: TourMediaProps) {
         playsInline
         poster={PLACEHOLDER_IMAGE}
         className="w-full h-48 sm:h-56 lg:h-64 object-cover rounded-t-2xl"
-        aria-label={`${name} preview video`}
-      >
+        aria-label={`${name} preview video`}>
         <track kind="captions" srcLang="en" />
       </video>
     );
@@ -91,35 +89,31 @@ export default function ToursListingPage() {
 
       <main
         role="main"
-        className="min-h-screen bg-linear-to-b from-gray-50 to-white"
-      >
+        className="min-h-screen bg-linear-to-b from-gray-50 to-white">
         {/* Hero Header */}
-  <section
-  aria-labelledby="tours-page-heading"
-  className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 lg:pt-16 pb-6 sm:pb-10 lg:pb-12 text-center lg:text-left shadow lg:shadow lg:shadow-gray-300  mb-2">
-  <h1  id="tours-page-heading"
-    className="
+        <section
+          aria-labelledby="tours-page-heading"
+          className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 lg:pt-16 pb-6 sm:pb-10 lg:pb-12 text-center lg:text-left shadow lg:shadow lg:shadow-gray-300  mb-2">
+          <h1
+            id="tours-page-heading"
+            className="
       text-2xl sm:text-3xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-snug sm:leading-tight">
-    Discover Your Next Adventure
-  </h1>
+            Discover Your Next Adventure
+          </h1>
 
-  <p
-    className="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto lg:mx-0 leading-relaxed">
-    Hand-curated tours and unique experiences waiting just for you.
-  </p>
-</section>
-
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto lg:mx-0 leading-relaxed">
+            Hand-curated tours and unique experiences waiting just for you.
+          </p>
+        </section>
 
         {/* Tours Grid */}
         <section
           aria-label="Available tours"
-          className="max-w-7xl mx-auto px-4 sm:px-6 pb-24"
-        >
+          className="max-w-7xl mx-auto px-4 sm:px-6 pb-24">
           {loading && (
             <div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-              aria-busy="true"
-            >
+              aria-busy="true">
               {Array.from({ length: 8 }).map((_, i) => (
                 <CardSkeleton key={i} />
               ))}
@@ -132,8 +126,7 @@ export default function ToursListingPage() {
               <button
                 type="button"
                 onClick={fetchTours}
-                className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
+                className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 Try again
               </button>
             </div>
@@ -155,20 +148,17 @@ export default function ToursListingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {tours.map((tour) => {
                 const price =
-                  tour.price && tour.price > 0
-                    ? `$${tour.price}`
-                    : "Inquire";
+                  tour.price && tour.price > 0 ? `$${tour.price}` : "Inquire";
 
                 return (
                   <Link
                     key={tour.id}
                     href={`/tours/${tour.id}`}
                     aria-label={`View details for ${tour.name}`}
-                    className="group block transition-transform hover:-translate-y-2"
-                  >
+                    className="group block transition-transform hover:-translate-y-2">
                     <article className="bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden flex flex-col h-full border border-gray-100">
                       <TourMedia
-                        url={tour.url}
+                        url={tour.url ?? null}
                         name={tour.name}
                         location={tour.location}
                       />
@@ -198,9 +188,7 @@ export default function ToursListingPage() {
                             <p className="text-xl font-bold text-emerald-600">
                               {price}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              per person
-                            </p>
+                            <p className="text-xs text-gray-500">per person</p>
                           </div>
 
                           <span className="text-emerald-700 font-medium group-hover:underline">

@@ -58,10 +58,10 @@ const Navbar = () => {
   const visibleLinks = baseLinks.filter((link) => !isActive(link.href));
 
   return (
-    <nav className="bg-gradient-to-l from-indigo-600 to-violet-600 shadow-lg sticky top-0 z-50">
+    <nav className="bg-linear-to-l from-indigo-600 to-violet-600 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Left: Logo + Mobile Hamburger */}
+          {/* Left Side: Logo + Mobile Hamburger */}
           <div className="flex items-center">
             <div className="md:hidden mr-4">
               <button
@@ -79,10 +79,10 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Right side: Links pushed right, UserMenu with gap only when present */}
+          {/* Right side: Links and Account Actions */}
           <div className="flex items-center">
             {/* Desktop Links */}
-            <div className="hidden md:flex items-center space-x-6 mr-8">
+            <div className="hidden md:flex items-center space-x-2">
               {visibleLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <span
@@ -97,13 +97,20 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* User Menu - only shown if logged in */}
-            {user && <UserMenu />}
+            {/* Account Actions Section (Notifications + Profile) */}
+            {user && (
+              /* Added ml-4 sm:ml-6 to separate from links.
+                 Added border-l and pl-4/pl-6 to create a visual vertical divider.
+              */
+              <div className="flex items-center ml-4 sm:ml-6 pl-4 sm:pl-6 border-l border-white/20">
+                <UserMenu />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu - unchanged */}
+      {/* Mobile Menu */}
       {isOpen && (
         <div
           ref={mobileMenuRef}

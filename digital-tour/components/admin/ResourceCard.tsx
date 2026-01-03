@@ -26,15 +26,17 @@ export default function ResourceCard({
 
   // Countdown timer
   useEffect(() => {
-    if (!isLocked || !resource?.lock_expires_at) {
+    if (!isLocked || !resource.lock_expires_at) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpiryCountdown("");
       return;
     }
 
+    const targetTime = new Date(resource.lock_expires_at).getTime();
+
     const interval = setInterval(() => {
-      const now = new Date();
-      const expiry = new Date(resource.lock_expires_at);
-      const diff = expiry.getTime() - now.getTime();
+      const now = Date.now();
+      const diff = targetTime - now;
 
       if (diff <= 0) {
         setExpiryCountdown("Expired");
@@ -49,7 +51,6 @@ export default function ResourceCard({
 
     return () => clearInterval(interval);
   }, [resource.lock_expires_at, isLocked]);
-
   const lockInfo = isLockedByOther
     ? `Locked by ${resource.locker?.name || `Admin ${resource.locked_by}`}`
     : isLockedByMe
@@ -65,14 +66,13 @@ export default function ResourceCard({
       onKeyDown={(e) => e.key === "Enter" && !isDisabled && onClick(resource)}>
       <div className="p-5 flex flex-col gap-5 md:flex-row md:items-center">
         {/* Thumbnail - Full width on mobile, fixed on larger */}
-        <div className="w-full md:w-40 lg:w-48 h-48 md:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
+        <div className="w-full md:w-40 lg:w-48 h-48 md:h-32 shrink-0 rounded-xl overflow-hidden bg-gray-100">
           {resource.type === "video" ? (
             <video
               src={resource.url}
               className="w-full h-full object-cover"
               muted
               playsInline
-              loading="lazy"
             />
           ) : resource.url ? (
             <img
@@ -157,6 +157,7 @@ export default function ResourceCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                 !isDisabled && onClick(resource);
               }}
               disabled={isDisabled}

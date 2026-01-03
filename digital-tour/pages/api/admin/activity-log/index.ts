@@ -22,7 +22,7 @@ interface Activity {
     before: any | null;
     after: any | null;
   };
-  createdAt: string;        // ISO string
+  createdAt: string; // ISO string
   relativeTime: string;
 }
 
@@ -50,7 +50,7 @@ export default async function handler(
     const token = getTokenFromRequest(req);
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    const payload = verifyToken(token);
+    const payload = verifyToken(token) as { id: number };
     if (!payload) return res.status(401).json({ message: "Invalid token" });
 
     const [userRecord]: any = await sequelize.query(
@@ -66,7 +66,7 @@ export default async function handler(
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 20));
     const offset = (page - 1) * limit;
-    const search = (req.query.search as string ?? "").trim();
+    const search = ((req.query.search as string) ?? "").trim();
 
     const replacements: any = { limit, offset, searchTerm: `%${search}%` };
 
@@ -136,10 +136,15 @@ export default async function handler(
 
       switch (log.target_type) {
         case "user":
-          display = log.target_user_name || log.target_user_email || `User #${log.target_id}`;
+          display =
+            log.target_user_name ||
+            log.target_user_email ||
+            `User #${log.target_id}`;
           break;
         case "resource":
-          display = log.target_resource_caption ? `"${log.target_resource_caption}"` : `Resource #${log.target_id}`;
+          display = log.target_resource_caption
+            ? `"${log.target_resource_caption}"`
+            : `Resource #${log.target_id}`;
           break;
         case "listing":
           display = log.target_listing_name || `Listing #${log.target_id}`;

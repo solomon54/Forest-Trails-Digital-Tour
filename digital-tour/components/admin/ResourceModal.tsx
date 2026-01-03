@@ -55,12 +55,13 @@ export default function ResourceModal({
   // Sync form on open
   useEffect(() => {
     if (resource) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCaption(resource.caption ?? "");
       setDescription(resource.description ?? "");
       setLocation(
         resource.status === "approved"
           ? resource.resourceListing?.location ?? ""
-          : resource.location ?? ""
+          : resource.caption ?? ""
       );
 
       setPrice(resource.resourceListing?.price ?? "");
