@@ -59,21 +59,23 @@ const Navbar = () => {
 
   return (
     <nav className="bg-linear-to-l from-indigo-600 to-violet-600 shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* REDUCED PADDING ON MOBILE: px-2 sm:px-6 lg:px-8 */}
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left Side: Logo + Mobile Hamburger */}
           <div className="flex items-center">
-            <div className="md:hidden mr-4">
+            <div className="md:hidden mr-2 sm:mr-4">
               <button
                 onClick={toggleMenu}
-                className="text-white text-3xl focus:outline-none"
+                className="text-white text-2xl sm:text-3xl focus:outline-none"
                 aria-label="Toggle menu">
                 {isOpen ? <HiX /> : <HiMenu />}
               </button>
             </div>
 
             <Link href="/">
-              <span className="text-white font-bold text-2xl cursor-pointer hover:text-emerald-200 transition">
+              {/* RESPONSIVE LOGO FONT: text-lg sm:text-2xl */}
+              <span className="text-white font-bold text-lg sm:text-2xl cursor-pointer hover:text-emerald-200 transition tracking-tight">
                 FOREST<span className="text-emerald-400">•</span>TRAILS
               </span>
             </Link>
@@ -82,11 +84,11 @@ const Navbar = () => {
           {/* Right side: Links and Account Actions */}
           <div className="flex items-center">
             {/* Desktop Links */}
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {visibleLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <span
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition ${
                       isActive(link.href)
                         ? "bg-white/30 text-white font-bold"
                         : "text-white hover:bg-white/20"
@@ -97,12 +99,10 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Account Actions Section (Notifications + Profile) */}
+            {/* Account Actions Section */}
             {user && (
-              /* Added ml-4 sm:ml-6 to separate from links.
-                 Added border-l and pl-4/pl-6 to create a visual vertical divider.
-              */
-              <div className="flex items-center ml-4 sm:ml-6 pl-4 sm:pl-6 border-l border-white/20">
+              /* REDUCED SPACING ON MOBILE: ml-2 sm:ml-6 pl-2 sm:pl-6 */
+              <div className="flex items-center ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-white/20">
                 <UserMenu />
               </div>
             )}
